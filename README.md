@@ -6,7 +6,7 @@
 **Tech Stack:** MongoDB, Express.js, React, Node.js (MERN)
 
 ---
-hello 
+
 ## 1. Project Overview
 
 ### The Problem
