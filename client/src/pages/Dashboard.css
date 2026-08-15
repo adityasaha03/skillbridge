@@ -1,0 +1,234 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+
+  --surface: var(--code-bg);
+  --brand: #000000;
+}
+
+/* Header Navigation */
+.dashboard-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 24px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.dashboard-header .logo {
+  justify-self: start;
+  font-family: var(--heading);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.dashboard-header .nav {
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-link {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 6px 10px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--accent);
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.logout-btn {
+  justify-self: end;
+  color: var(--text-h);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.logout-btn:hover,
+.logout-btn:focus-visible {
+  background: var(--accent-bg);
+  color: var(--accent);
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+/* Welcome Banner */
+.welcome {
+  padding: 32px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.welcome h1 {
+  margin: 0 0 32px;
+  color: var(--brand);
+}
+
+.welcome p {
+  max-width: 680px;
+  margin: 0 auto;
+  color: var(--brand);
+  line-height: 1.6;
+}
+
+/* Main Content */
+.dashboard-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding: 32px 24px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-main {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+  }
+}
+
+.column h2 {
+  margin: 0 0 16px;
+  color: var(--brand);
+}
+
+/* Match List */
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.match-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--bg);
+  flex-shrink: 0;
+}
+
+.match-info h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.match-info p {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.connect-btn {
+  margin-left: auto;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.connect-btn:hover {
+  background: var(--accent);
+  filter: brightness(0.9);
+}
+
+.connect-btn:active {
+  transform: scale(0.97);
+}
+
+/* Trade Form */
+.trade-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--text-h);
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 15px;
+  background: var(--bg);
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+/* Post Button */
+.post-btn {
+  align-self: stretch;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.post-btn:hover {
+  filter: brightness(0.9);
+}
+
+.post-btn:active {
+  transform: scale(0.98);
+}
