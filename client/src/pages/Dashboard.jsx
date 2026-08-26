@@ -276,7 +276,7 @@ const Dashboard = () => {
 
           <Link
             to="/"
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95"
+            className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
           >
             Log Out
           </Link>
@@ -339,15 +339,20 @@ const Dashboard = () => {
                   className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
                 >
                   {/* Student Information */}
+                  <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
 
-                  <div className="flex items-start gap-4">
+                    {/* Avatar */}
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-lg font-bold text-indigo-600">
                       {peer.avatar}
                     </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
+                    {/* Main Card Content */}
+                    <div className="w-full min-w-0 flex-1">
+
+                      {/* Name + Connect */}
+                      <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                        <div className="text-center sm:text-left">
                           <h3 className="font-bold text-slate-900">
                             {peer.name}
                           </h3>
@@ -361,19 +366,21 @@ const Dashboard = () => {
                           type="button"
                           disabled={requestSent}
                           onClick={() => handleConnect(peer.id)}
-                          className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${requestSent
+                          className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition sm:w-auto ${requestSent
                             ? "cursor-default border border-emerald-200 bg-emerald-50 text-emerald-700"
                             : "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 active:scale-95"
                             }`}
                         >
                           {requestSent ? "Request Sent" : "Connect"}
                         </button>
+
                       </div>
 
                       {/* Reciprocal Exchange */}
-
                       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+
+                        {/* You Learn */}
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
                           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                             You Learn
                           </p>
@@ -383,7 +390,8 @@ const Dashboard = () => {
                           </p>
                         </div>
 
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        {/* You Teach */}
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
                           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                             You Teach
                           </p>
@@ -392,19 +400,20 @@ const Dashboard = () => {
                             {peer.teachPeer}
                           </p>
                         </div>
+
                       </div>
 
-                      {/* Context Bio */}
-
-                      <div className="mt-4">
+                      {/* Context */}
+                      <div className="mt-4 text-center sm:text-left">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                           Context
                         </p>
 
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                        <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-600 sm:mx-0">
                           {peer.bio}
                         </p>
                       </div>
+
                     </div>
                   </div>
                 </article>
