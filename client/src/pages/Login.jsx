@@ -13,7 +13,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-[#f0f4f8] p-4">
-      <div className="bg-white p-8 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.1)] w-full max-w-[400px]">
+      <div className="bg-white p-8 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.1)] w-full max-w-100">
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
           Log In to SkillBridge
         </h2>

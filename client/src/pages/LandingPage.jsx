@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
-    <div className="max-w-[1200px] mx-auto px-4 min-h-screen bg-gray-50 text-gray-800">
+    <div className="max-w-300 mx-auto px-4 min-h-screen bg-gray-50 text-gray-800">
       {/* Header */}
       <header className="flex justify-between items-center py-4">
         <div className="text-2xl font-bold text-[#0066cc]">SkillBridge</div>
