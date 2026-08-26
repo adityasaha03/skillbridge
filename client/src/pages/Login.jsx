@@ -12,55 +12,69 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-[#f0f4f8] p-4">
-      <div className="bg-white p-8 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.1)] w-full max-w-100">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
-          Log In to SkillBridge
-        </h2>
-        <p className="text-gray-600 mb-6 text-center">
-          Welcome back! Please enter your credentials.
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12 text-slate-900">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        
+        {/* Header */}
+        <div className="text-center">
+          <Link to="/" className="text-3xl font-extrabold tracking-tight text-slate-950 inline-block mb-3">
+            Skill<span className="text-indigo-600">Bridge</span>
+          </Link>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+            Welcome back
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Please enter your university credentials to continue.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4 flex flex-col">
-            <label htmlFor="email" className="text-sm mb-1 text-gray-800 font-medium">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <div>
+            <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-1.5">
               AUST Email
             </label>
             <input
               id="email"
               type="email"
+              placeholder="student@aust.edu"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="p-2 border border-gray-300 rounded text-base focus:outline-none focus:border-[#0066cc]"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
-          <div className="mb-4 flex flex-col">
-            <label htmlFor="password" className="text-sm mb-1 text-gray-800 font-medium">
-              Password
-            </label>
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
+                Password
+              </label>
+            </div>
             <input
               id="password"
               type="password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="p-2 border border-gray-300 rounded text-base focus:outline-none focus:border-[#0066cc]"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-6 border-none rounded cursor-pointer text-base bg-[#0066cc] text-white mt-4 hover:bg-[#0055aa] transition-colors"
+            className="w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.99] shadow-sm"
           >
             Log In
           </button>
         </form>
 
-        <p className="mt-6 text-center">
-          <Link to="/register" className="text-[#0066cc] no-underline mt-2 inline-block hover:underline">
-            Don't have an account? Sign Up
+        {/* Footer Link */}
+        <p className="text-center text-sm text-slate-600">
+          Don't have an account?{' '}
+          <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500 hover:underline">
+            Sign Up
           </Link>
         </p>
       </div>
