@@ -13,18 +13,9 @@ const matchHistory = [
         department: "CSE",
         semester: "3.1",
         date: "24 Aug 2026",
-
-        learned: [
-            "React UI",
-            "React Hooks",
-        ],
-
-        taught: [
-            "C++ Graph Algorithms",
-            "Data Structures",
-        ],
+        learned: ["React UI", "React Hooks"],
+        taught: ["C++ Graph Algorithms", "Data Structures"],
     },
-
     {
         id: 2,
         name: "Mehjabin Tasnim",
@@ -32,18 +23,9 @@ const matchHistory = [
         department: "CSE",
         semester: "2.2",
         date: "18 Aug 2026",
-
-        learned: [
-            "Data Structures",
-            "Algorithms",
-        ],
-
-        taught: [
-            "Python",
-            "Machine Learning",
-        ],
+        learned: ["Data Structures", "Algorithms"],
+        taught: ["Python", "Machine Learning"],
     },
-
     {
         id: 3,
         name: "Siam Uddin",
@@ -51,16 +33,9 @@ const matchHistory = [
         department: "EEE",
         semester: "3.2",
         date: "12 Aug 2026",
-
-        learned: [
-            "Python for Machine Learning",
-        ],
-
-        taught: [
-            "CAE",
-        ],
+        learned: ["Python for Machine Learning"],
+        taught: ["CAE"],
     },
-
     {
         id: 4,
         name: "Nafisa Islam",
@@ -68,26 +43,16 @@ const matchHistory = [
         department: "CSE",
         semester: "2.1",
         date: "05 Aug 2026",
-
-        learned: [
-            "Database Design",
-            "MongoDB",
-        ],
-
-        taught: [
-            "Java",
-            "Object Oriented Programming",
-        ],
+        learned: ["Database Design", "MongoDB"],
+        taught: ["Java", "Object Oriented Programming"],
     },
 ];
-
 
 /* ---------------------------------------
    HISTORY PAGE
 ---------------------------------------- */
 
 const History = () => {
-
     const [search, setSearch] = useState("");
 
     /* ---------------------------------------
@@ -95,12 +60,9 @@ const History = () => {
     ---------------------------------------- */
 
     const filteredHistory = matchHistory.filter((match) => {
-
         const searchText = search.toLowerCase();
 
-        const nameMatch = match.name
-            .toLowerCase()
-            .includes(searchText);
+        const nameMatch = match.name.toLowerCase().includes(searchText);
 
         const learnedMatch = match.learned.some((skill) =>
             skill.toLowerCase().includes(searchText)
@@ -112,7 +74,6 @@ const History = () => {
 
         return nameMatch || learnedMatch || taughtMatch;
     });
-
 
     /* ---------------------------------------
        STATISTICS
@@ -130,36 +91,24 @@ const History = () => {
         0
     );
 
-
     return (
-
         <div className="min-h-screen bg-slate-50 text-slate-900">
-
             {/* =====================================
           NAVBAR
       ====================================== */}
 
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-
                     {/* Logo */}
-
                     <Link
                         to="/dashboard"
                         className="text-2xl font-bold tracking-tight text-slate-950"
                     >
-                        Skill
-                        <span className="text-indigo-600">
-                            Bridge
-                        </span>
+                        Skill<span className="text-indigo-600">Bridge</span>
                     </Link>
 
-
                     {/* Navigation */}
-
                     <nav className="flex items-center gap-4 md:gap-8">
-
                         <Link
                             to="/dashboard"
                             className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
@@ -180,33 +129,24 @@ const History = () => {
                         >
                             Profile
                         </Link>
-
                     </nav>
 
-
                     {/* Logout */}
-
                     <Link
                         to="/"
                         className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
                     >
                         Log Out
                     </Link>
-
                 </div>
-
             </header>
-
-
 
             {/* =====================================
           HISTORY INTRO
       ====================================== */}
 
             <section className="mx-auto max-w-7xl px-6 pt-10">
-
                 <div className="flex flex-col items-center rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-sm md:p-12">
-
                     <span className="mb-4 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-1.5 text-sm font-semibold text-indigo-700">
                         Your Learning Journey
                     </span>
@@ -216,34 +156,25 @@ const History = () => {
                     </h1>
 
                     <p className="max-w-2xl text-base leading-7 text-slate-600">
-                        Review the students you previously matched with and see
-                        the skills you exchanged with each other.
+                        Review the students you previously matched with and see the skills
+                        you exchanged with each other.
                     </p>
-
                 </div>
-
             </section>
-
-
 
             {/* =====================================
           MAIN CONTENT
       ====================================== */}
 
             <main className="mx-auto max-w-7xl px-6 py-10">
-
-
                 {/* =====================================
             SUMMARY
         ====================================== */}
 
                 <section className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
                     {/* Previous Matches */}
-
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600">
+                        <div className="mb-1 flex h-5 w-10 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600">
                             ↔
                         </div>
 
@@ -254,15 +185,11 @@ const History = () => {
                         <p className="mt-1 text-3xl font-bold text-slate-950">
                             {totalPeople}
                         </p>
-
                     </div>
 
-
                     {/* Skills Learned */}
-
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600">
+                        <div className="mb-3 flex h-5 w-10 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600">
                             ↓
                         </div>
 
@@ -273,15 +200,11 @@ const History = () => {
                         <p className="mt-1 text-3xl font-bold text-indigo-600">
                             {totalLearned}
                         </p>
-
                     </div>
 
-
-                    {/* Skills Taught */}
-
+                    {/* Skills Shared */}
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600">
+                        <div className="mb-3 flex h-5 w-10 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600">
                             ↑
                         </div>
 
@@ -292,26 +215,17 @@ const History = () => {
                         <p className="mt-1 text-3xl font-bold text-indigo-600">
                             {totalTaught}
                         </p>
-
                     </div>
-
                 </section>
-
-
 
                 {/* =====================================
             HISTORY HEADER
         ====================================== */}
 
                 <section>
-
                     <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-
-
                         {/* Heading */}
-
                         <div>
-
                             <span className="text-sm font-semibold text-indigo-600">
                                 Previous Connections
                             </span>
@@ -323,15 +237,10 @@ const History = () => {
                             <p className="mt-2 text-sm leading-6 text-slate-600">
                                 See who you matched with and what knowledge you exchanged.
                             </p>
-
                         </div>
 
-
-
                         {/* Search */}
-
                         <div className="w-full md:w-80">
-
                             <label
                                 htmlFor="history-search"
                                 className="mb-2 block text-left text-sm font-semibold text-slate-700"
@@ -347,145 +256,92 @@ const History = () => {
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                             />
-
                         </div>
-
                     </div>
-
-
 
                     {/* =====================================
               HISTORY LIST
           ====================================== */}
 
                     <div className="space-y-5">
-
                         {filteredHistory.map((match) => (
-
                             <article
                                 key={match.id}
                                 className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
                             >
-
-
-                                {/* Person Information */}
-
                                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
-
-
+                                    {/* Person Information */}
                                     <div className="flex min-w-[250px] items-center gap-4">
-
                                         {/* Avatar */}
-
                                         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl font-bold text-indigo-600">
-
                                             {match.avatar}
-
                                         </div>
 
-
                                         {/* Name */}
-
                                         <div>
-
                                             <h3 className="text-lg font-bold text-slate-900">
                                                 {match.name}
                                             </h3>
 
                                             <p className="mt-1 text-sm text-slate-500">
-                                                {match.department}
-                                                {" · "}
-                                                Semester {match.semester}
+                                                {match.department} · Semester {match.semester}
                                             </p>
 
                                             <p className="mt-1 text-xs text-slate-400">
                                                 Matched on {match.date}
                                             </p>
-
                                         </div>
-
                                     </div>
 
-
-
                                     {/* Skill Exchange */}
-
                                     <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
-
-
                                         {/* Learned */}
-
                                         <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-
-                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                                            <p className="text-center text-xs font-semibold uppercase tracking-wide text-indigo-600">
                                                 You Learned From {match.name.split(" ")[0]}
                                             </p>
 
-                                            <div className="flex flex-wrap gap-2">
-
+                                            <div className="mt-5 flex flex-wrap justify-center gap-2">
                                                 {match.learned.map((skill) => (
-
                                                     <span
                                                         key={skill}
-                                                        className="rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-semibold text-indigo-700"
+                                                        className="rounded-md border border-indigo-100 bg-white px-2.5 py-1 text-xs font-semibold text-indigo-700"
                                                     >
                                                         {skill}
                                                     </span>
-
                                                 ))}
-
                                             </div>
-
                                         </div>
 
-
-
                                         {/* Taught */}
-
                                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-
-                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                            <p className="text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
                                                 You Taught {match.name.split(" ")[0]}
                                             </p>
 
-                                            <div className="flex flex-wrap gap-2">
-
+                                            <div className="mt-5 flex flex-wrap justify-center gap-2">
                                                 {match.taught.map((skill) => (
-
                                                     <span
                                                         key={skill}
-                                                        className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700"
+                                                        className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700"
                                                     >
                                                         {skill}
                                                     </span>
-
                                                 ))}
-
                                             </div>
-
                                         </div>
-
-
                                     </div>
-
                                 </div>
-
                             </article>
-
                         ))}
-
                     </div>
-
-
 
                     {/* =====================================
               EMPTY SEARCH RESULT
           ====================================== */}
 
                     {filteredHistory.length === 0 && (
-
                         <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-xl font-bold text-indigo-600">
                                 ↔
                             </div>
@@ -497,32 +353,20 @@ const History = () => {
                             <p className="mt-2 text-sm text-slate-500">
                                 We couldn't find a previous match for "{search}".
                             </p>
-
                         </div>
-
                     )}
-
-
                 </section>
-
             </main>
-
-
 
             {/* =====================================
           FOOTER
       ====================================== */}
 
             <footer className="mt-6 border-t border-slate-200 bg-white">
-
                 <div className="mx-auto max-w-7xl px-6 py-6 text-center text-sm text-slate-500">
-
                     © 2026 SkillBridge · Learn together. Grow together.
-
                 </div>
-
             </footer>
-
         </div>
     );
 };
