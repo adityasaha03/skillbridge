@@ -265,6 +265,13 @@ const Dashboard = () => {
             </Link>
 
             <Link
+              to="/chat"
+              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
+            >
+              Chat
+            </Link>
+
+            <Link
               to="/profile"
               className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
             >
