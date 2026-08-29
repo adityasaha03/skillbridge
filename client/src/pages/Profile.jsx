@@ -81,7 +81,7 @@ const Profile = () => {
           NAVBAR
       ====================================== */}
 
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-slate-300 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo */}
 
@@ -131,7 +131,7 @@ const Profile = () => {
             <Link
               to="/notifications"
               aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-600 bg-white text-indigo-600 shadow-sm transition hover:bg-indigo-50 active:scale-95"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg border-2 border-indigo-600 bg-white text-indigo-600 shadow-sm transition hover:bg-indigo-50 active:scale-95"
             >
               <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a6 6 0 0 1 12 0c0 3.5 1 5 1.5 6H4.5C5 13 6 11.5 6 8Z" />
@@ -170,10 +170,10 @@ const Profile = () => {
       ====================================== */}
 
       <main className="mx-auto flex w-full max-w-7xl flex-1 gap-0 overflow-hidden px-0 py-0 sm:px-6 sm:py-6">
-        <div className="flex w-full flex-col overflow-hidden rounded-none border-0 border-slate-200 bg-white shadow-none sm:rounded-2xl sm:border sm:shadow-sm">
+        <div className="flex w-full flex-col overflow-hidden rounded-none border-0 border-slate-300 bg-white shadow-none sm:rounded-2xl sm:border sm:shadow-sm">
           
           {/* Card Header */}
-          <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+          <div className="flex items-center justify-between border-b border-slate-300 px-6 py-5">
             <div>
               <h1 className="text-xl font-bold text-slate-950">User Profile</h1>
               <p className="text-xs text-slate-500">Manage your personal information and preferences.</p>
@@ -277,7 +277,7 @@ const Profile = () => {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Can Teach</label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {formData.skillsToTeach.map((skill, index) => (
-                      <span key={index} className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                      <span key={index} className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
                         {skill}
                         <button type="button" onClick={() => removeSkill("teach", index)} className="hover:text-indigo-900">×</button>
                       </span>
@@ -294,7 +294,7 @@ const Profile = () => {
                     <button
                       type="button"
                       onClick={() => addSkill("teach")}
-                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                      className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
                     >
                       Add
                     </button>
@@ -306,7 +306,7 @@ const Profile = () => {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Want to Learn</label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {formData.skillsToLearn.map((skill, index) => (
-                      <span key={index} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                      <span key={index} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                         {skill}
                         <button type="button" onClick={() => removeSkill("learn", index)} className="hover:text-slate-900">×</button>
                       </span>
@@ -323,7 +323,7 @@ const Profile = () => {
                     <button
                       type="button"
                       onClick={() => addSkill("learn")}
-                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                      className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
                     >
                       Add
                     </button>
@@ -352,7 +352,7 @@ const Profile = () => {
               <div className="space-y-8 max-w-4xl">
                 {/* Header Profile Info */}
                 <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-3xl font-bold text-indigo-600">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-indigo-200 bg-indigo-50 text-3xl font-bold text-indigo-600">
                     {profile.avatar}
                   </div>
                   <div>
@@ -363,41 +363,41 @@ const Profile = () => {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-1 gap-6 border-y border-slate-100 py-6 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 border-y border-slate-300 py-6 sm:grid-cols-2">
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Email Address</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Email Address</span>
                     <p className="mt-1 text-sm font-semibold text-slate-800">{profile.email}</p>
                   </div>
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Phone Number</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Phone Number</span>
                     <p className="mt-1 text-sm font-semibold text-slate-800">{profile.phone}</p>
                   </div>
                 </div>
 
                 {/* Bio Section */}
                 <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">About Me</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">About Me</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{profile.bio}</p>
                 </div>
 
                 {/* Skills Sections */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5">
+                  <div className="rounded-2xl border border-slate-300 bg-slate-50/60 p-5">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Skills Can Teach</h3>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {profile.skillsToTeach.map((skill, index) => (
-                        <span key={index} className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                        <span key={index} className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
                           {skill}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5">
+                  <div className="rounded-2xl border border-slate-300 bg-slate-50/60 p-5">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Skills Want to Learn</h3>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {profile.skillsToLearn.map((skill, index) => (
-                        <span key={index} className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
+                        <span key={index} className="rounded-full border border-slate-300 bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
                           {skill}
                         </span>
                       ))}
