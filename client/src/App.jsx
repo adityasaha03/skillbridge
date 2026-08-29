@@ -7,6 +7,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
+import Chat from "./pages/Chat";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/history" element={<History />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/notifications"element={<Notifications />} />
       </Routes>
     </Router>
   );

@@ -37,7 +37,7 @@ const Login = () => {
             <input
               id="email"
               type="email"
-              placeholder="student@aust.edu"
+              placeholder="name.dept.id@aust.edu"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

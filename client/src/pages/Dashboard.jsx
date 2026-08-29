@@ -237,51 +237,89 @@ const Dashboard = () => {
       ====================================== */}
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo */}
-
-          <Link
-            to="/dashboard"
-            className="text-2xl font-bold tracking-tight text-slate-950"
-          >
-            Skill<span className="text-indigo-600">Bridge</span>
-          </Link>
-
-          {/* Navigation */}
-
-          <nav className="flex items-center gap-4 md:gap-8">
-            <Link
-              to="/dashboard"
-              className="text-sm font-semibold text-indigo-600"
-            >
-              Topics
-            </Link>
-
-            <Link
-              to="/history"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              History
-            </Link>
-
-            <Link
-              to="/profile"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              Profile
-            </Link>
-          </nav>
-
-          {/* Logout */}
-
-          <Link
-            to="/"
-            className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
-          >
-            Log Out
-          </Link>
-        </div>
-      </header>
+              <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+                {/* Logo */}
+      
+                <Link
+                  to="/dashboard"
+                  className="text-2xl font-bold tracking-tight text-slate-950"
+                >
+                  Skill<span className="text-indigo-600">Bridge</span>
+                </Link>
+      
+                {/* Navigation */}
+      
+                <nav className="flex items-center gap-4 md:gap-8">
+                  <Link
+                    to="/dashboard"
+                    className="text-sm font-semibold text-indigo-600"
+                  >
+                    Topics
+                  </Link>
+      
+                  <Link
+                    to="/history"
+                    className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
+                  >
+                    History
+                  </Link>
+      
+                  <Link
+                    to="/chat"
+                    className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
+                  >
+                    Chat
+                  </Link>
+      
+                  <Link
+                    to="/profile"
+                    className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
+                  >
+                    Profile
+                  </Link>
+                </nav>
+      
+                {/* Right-side controls */}
+                <div className="flex items-center gap-2 sm:gap-3">
+      
+                  {/* Notification Bell — active state (unread present) */}
+                  <Link
+                    to="/notifications"
+                    aria-label="Notifications"
+                    className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-600 bg-white text-indigo-600 shadow-sm transition hover:bg-indigo-50 active:scale-95"
+                  >
+                    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a6 6 0 0 1 12 0c0 3.5 1 5 1.5 6H4.5C5 13 6 11.5 6 8Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 17a2.5 2.5 0 0 0 5 0" />
+                    </svg>
+                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white">
+                      3
+                    </span>
+                  </Link>
+      
+                  {/* Theme Switcher */}
+                  <button
+                    type="button"
+                    aria-label="Toggle dark mode"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95"
+                  >
+                    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <circle cx="12" cy="12" r="4" />
+                      <path strokeLinecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                  </button>
+      
+                
+                  {/* Logout */}
+                  <Link
+                    to="/"
+                    className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
+                  >
+                    Log Out
+                  </Link>
+                </div>
+              </div>
+            </header>
 
       {/* =====================================
           WELCOME
