@@ -59,7 +59,7 @@ const TagManager = ({ label, description, badgeColor, selectedTags, setSelectedT
       </div>
 
       {/* Tag Badges */}
-      <div className="flex flex-wrap gap-2 min-h-[38px] p-2 bg-slate-50 border border-slate-200 rounded-lg">
+      <div className="flex flex-wrap gap-2 min-h-9.5 p-2 bg-slate-50 border border-slate-200 rounded-lg">
         {selectedTags.length === 0 && (
           <span className="text-xs text-slate-400 self-center px-1">No tags selected yet.</span>
         )}
