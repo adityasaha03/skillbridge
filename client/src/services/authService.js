@@ -3,14 +3,24 @@ export const getCsrfTokenFromCookie = () => {
   return match ? match[2] : null;
 };
 
+const safeJsonParse = async (res) => {
+  const text = await res.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return {};
+  }
+};
+
 export const fetchCsrfToken = async () => {
   try {
     const res = await fetch('/api/v1/auth/csrf-token', {
       method: 'GET',
       credentials: 'include',
     });
-    const data = await res.json();
-    return data.csrfToken;
+    if (!res.ok) return null;
+    const data = await safeJsonParse(res);
+    return data.csrfToken || null;
   } catch (err) {
     console.error('Failed to fetch CSRF token:', err);
     return null;
@@ -30,9 +40,13 @@ export const registerUser = async ({ fullName, email, studentId, department, pas
     body: JSON.stringify({ fullName, email, studentId, department, password }),
   });
 
-  const data = await res.json();
+  const data = await safeJsonParse(res);
   if (!res.ok) {
-    throw new Error(data.message || (data.errors && data.errors.join(', ')) || 'Registration failed');
+    throw new Error(
+      data.message ||
+      (data.errors && data.errors.join(', ')) ||
+      `Server error (${res.status}). Ensure backend and MongoDB are running.`
+    );
   }
 
   return data;
@@ -51,9 +65,12 @@ export const loginUser = async ({ email, password }) => {
     body: JSON.stringify({ email, password }),
   });
 
-  const data = await res.json();
+  const data = await safeJsonParse(res);
   if (!res.ok) {
-    throw new Error(data.message || 'Login failed');
+    throw new Error(
+      data.message ||
+      `Server error (${res.status}). Ensure backend and MongoDB are running.`
+    );
   }
 
   return data;
@@ -68,7 +85,7 @@ export const refreshSession = async () => {
     credentials: 'include',
   });
 
-  const data = await res.json();
+  const data = await safeJsonParse(res);
   if (!res.ok) {
     throw new Error(data.message || 'Session refresh failed');
   }
@@ -88,7 +105,7 @@ export const logoutUser = async () => {
     credentials: 'include',
   });
 
-  const data = await res.json();
+  const data = await safeJsonParse(res);
   return data;
 };
 
@@ -106,7 +123,7 @@ export const getCurrentUser = async () => {
         credentials: 'include',
       });
       if (retryRes.ok) {
-        return (await retryRes.json()).user;
+        return (await safeJsonParse(retryRes)).user;
       }
     } catch {
       return null;
@@ -114,6 +131,6 @@ export const getCurrentUser = async () => {
   }
 
   if (!res.ok) return null;
-  const data = await res.json();
+  const data = await safeJsonParse(res);
   return data.user;
 };

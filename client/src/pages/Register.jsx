@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { registerUser } from '../services/authService';
 
 const departments = [
   'Department of Architecture (ARCH)',
@@ -18,11 +19,29 @@ const Register = () => {
   const [studentId, setStudentId] = useState('');
   const [department, setDepartment] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+
+    try {
+      await registerUser({
+        fullName,
+        email,
+        studentId,
+        department,
+        password,
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please check your details.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,6 +60,13 @@ const Register = () => {
             Create your account to start exchanging knowledge.
           </p>
         </div>
+
+        {/* Error Notification */}
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -81,7 +107,7 @@ const Register = () => {
             <input
               id="studentId"
               type="text"
-              placeholder="Your AUST ID"
+              placeholder="e.g. 22.01.04.001"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
               required
@@ -115,7 +141,7 @@ const Register = () => {
 
           <div>
             <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-800">
-              Password
+              Password (min 8 characters)
             </label>
             <input
               id="password"
@@ -124,15 +150,17 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={8}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.99] shadow-sm"
+            disabled={loading}
+            className="w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.99] shadow-sm disabled:opacity-60"
           >
-            Create Account
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 

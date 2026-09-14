@@ -1,62 +1,134 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
-/* ---------------------------------------
-   DUMMY USER DATA
----------------------------------------- */
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { fetchUserProfile, updateUserProfile, updateUserSkills } from "../services/userService";
+import { fetchNotifications } from "../services/notificationService";
+import { logoutUser } from "../services/authService";
 
 const initialProfile = {
-  name: "Shirsha Chowdhury",
+  name: "Student",
   role: "Undergraduate Student",
   department: "CSE",
   institution: "Ahsanullah University of Science and Technology",
   avatar: "S",
-  email: "shirsha.cse@aust.edu",
-  phone: "+880 1700-000000",
-  bio: "Passionate about algorithms, Flutter development, and building full-stack web and mobile systems.",
-  skillsToTeach: ["Data Structures & Algorithms", "C++", "Flutter"],
-  skillsToLearn: ["Machine Learning", "System Architecture"],
+  email: "",
+  phone: "",
+  bio: "",
+  skillsToTeach: [],
+  skillsToLearn: [],
 };
 
-/* ---------------------------------------
-   PROFILE PAGE
----------------------------------------- */
-
 const Profile = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(initialProfile);
   const [newTeachSkill, setNewTeachSkill] = useState("");
   const [newLearnSkill, setNewLearnSkill] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const user = await fetchUserProfile();
+        if (user) {
+          const mapped = {
+            name: user.fullName || "Student",
+            role: user.roles?.includes("tutor") ? "Tutor / Student" : "Undergraduate Student",
+            department: user.department || "CSE",
+            semester: user.semester || "2.2",
+            institution: user.institution || "Ahsanullah University of Science and Technology",
+            avatar: user.avatar || user.fullName?.charAt(0).toUpperCase() || "S",
+            email: user.email || "",
+            phone: user.phone || "",
+            bio: user.contextBio || "",
+            skillsToTeach: (user.strongTags || []).map((t) => t.name || t),
+            skillsToLearn: (user.weakTags || []).map((t) => t.name || t),
+          };
+          setProfile(mapped);
+          setFormData(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load user profile:", err);
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+
+      try {
+        const notifs = await fetchNotifications();
+        setUnreadCount(notifs.unreadCount || 0);
+      } catch (e) {
+        console.warn("Failed to fetch notification count", e);
+      }
+    };
+
+    loadProfile();
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setProfile(formData);
-    setIsEditing(false);
+    setSaving(true);
+    setStatusMessage("");
+    setErrorMessage("");
+
+    try {
+      // 1. Update personal details
+      await updateUserProfile({
+        fullName: formData.name,
+        department: formData.department,
+        semester: formData.semester,
+        phone: formData.phone,
+        institution: formData.institution,
+        contextBio: formData.bio,
+      });
+
+      // 2. Update skills
+      await updateUserSkills({
+        wantToLearn: formData.skillsToLearn,
+        canTeach: formData.skillsToTeach,
+      });
+
+      setProfile(formData);
+      setIsEditing(false);
+      setStatusMessage("Profile updated successfully!");
+    } catch (err) {
+      setErrorMessage(err.message || "Failed to save profile changes.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setFormData(profile);
     setIsEditing(false);
+    setErrorMessage("");
   };
 
   const addSkill = (type) => {
     if (type === "teach" && newTeachSkill.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        skillsToTeach: [...prev.skillsToTeach, newTeachSkill.trim()],
-      }));
+      if (!formData.skillsToTeach.includes(newTeachSkill.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          skillsToTeach: [...prev.skillsToTeach, newTeachSkill.trim()],
+        }));
+      }
       setNewTeachSkill("");
     } else if (type === "learn" && newLearnSkill.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        skillsToLearn: [...prev.skillsToLearn, newLearnSkill.trim()],
-      }));
+      if (!formData.skillsToLearn.includes(newLearnSkill.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          skillsToLearn: [...prev.skillsToLearn, newLearnSkill.trim()],
+        }));
+      }
       setNewLearnSkill("");
     }
   };
@@ -75,16 +147,30 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } finally {
+      navigate("/login");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
+        Loading profile...
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       {/* =====================================
           NAVBAR
       ====================================== */}
-
       <header className="sticky top-0 z-50 border-b border-slate-300 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo */}
-
           <Link
             to="/dashboard"
             className="text-2xl font-bold tracking-tight text-slate-950"
@@ -93,7 +179,6 @@ const Profile = () => {
           </Link>
 
           {/* Navigation */}
-
           <nav className="flex items-center gap-4 md:gap-8">
             <Link
               to="/dashboard"
@@ -126,7 +211,6 @@ const Profile = () => {
 
           {/* Right-side controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-
             {/* Notification Bell */}
             <Link
               to="/notifications"
@@ -137,30 +221,20 @@ const Profile = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a6 6 0 0 1 12 0c0 3.5 1 5 1.5 6H4.5C5 13 6 11.5 6 8Z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 17a2.5 2.5 0 0 0 5 0" />
               </svg>
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white">
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
-
-            {/* Theme Switcher */}
-            <button
-              type="button"
-              aria-label="Toggle dark mode"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95"
-            >
-              <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="12" r="4" />
-                <path strokeLinecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-              </svg>
-            </button>
 
             {/* Logout */}
-            <Link
-              to="/"
-              className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
+            <button
+              onClick={handleLogout}
+              className="cursor-pointer whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
             >
               Log Out
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -168,7 +242,6 @@ const Profile = () => {
       {/* =====================================
           PROFILE MAIN SHELL
       ====================================== */}
-
       <main className="mx-auto flex w-full max-w-7xl flex-1 gap-0 overflow-hidden px-0 py-0 sm:px-6 sm:py-6">
         <div className="flex w-full flex-col overflow-hidden rounded-none border-0 border-slate-300 bg-white shadow-none sm:rounded-2xl sm:border sm:shadow-sm">
           
@@ -176,18 +249,30 @@ const Profile = () => {
           <div className="flex items-center justify-between border-b border-slate-300 px-6 py-5">
             <div>
               <h1 className="text-xl font-bold text-slate-950">User Profile</h1>
-              <p className="text-xs text-slate-500">Manage your personal information and preferences.</p>
+              <p className="text-xs text-slate-500">Manage your university information, bio, and complementary skills.</p>
             </div>
             {!isEditing && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 sm:text-sm"
+                className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 sm:text-sm"
               >
                 Edit Profile
               </button>
             )}
           </div>
+
+          {statusMessage && (
+            <div className="mx-6 mt-4 rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-sm text-emerald-800">
+              {statusMessage}
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mx-6 mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+              {errorMessage}
+            </div>
+          )}
 
           <div className="flex-1 overflow-y-auto p-6 md:p-8">
             {isEditing ? (
@@ -210,9 +295,9 @@ const Profile = () => {
                     <input
                       type="text"
                       name="role"
+                      disabled
                       value={formData.role}
-                      onChange={handleInputChange}
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 outline-none"
                     />
                   </div>
 
@@ -223,6 +308,18 @@ const Profile = () => {
                       name="department"
                       value={formData.department}
                       onChange={handleInputChange}
+                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Semester</label>
+                    <input
+                      type="text"
+                      name="semester"
+                      value={formData.semester || ""}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 2.2, 3.1"
                       className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
@@ -239,42 +336,33 @@ const Profile = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Email Address</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                    />
-                  </div>
-
-                  <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Phone</label>
                     <input
                       type="text"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
+                      placeholder="+880 1..."
                       className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Bio</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Bio & Study Context</label>
                   <textarea
                     name="bio"
                     rows={3}
                     value={formData.bio}
                     onChange={handleInputChange}
+                    placeholder="Describe what you excel at and what topics you need help with..."
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-4 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   />
                 </div>
 
                 {/* Edit Skills to Teach */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Can Teach</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Can Teach (Strong Tags)</label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {formData.skillsToTeach.map((skill, index) => (
                       <span key={index} className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
@@ -288,7 +376,7 @@ const Profile = () => {
                       type="text"
                       value={newTeachSkill}
                       onChange={(e) => setNewTeachSkill(e.target.value)}
-                      placeholder="Add a skill..."
+                      placeholder="Add a skill you can teach..."
                       className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs text-slate-900 outline-none focus:border-indigo-500"
                     />
                     <button
@@ -303,7 +391,7 @@ const Profile = () => {
 
                 {/* Edit Skills to Learn */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Want to Learn</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Want to Learn (Weak Tags)</label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {formData.skillsToLearn.map((skill, index) => (
                       <span key={index} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
@@ -317,7 +405,7 @@ const Profile = () => {
                       type="text"
                       value={newLearnSkill}
                       onChange={(e) => setNewLearnSkill(e.target.value)}
-                      placeholder="Add a skill..."
+                      placeholder="Add a skill you want to learn..."
                       className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs text-slate-900 outline-none focus:border-indigo-500"
                     />
                     <button
@@ -334,14 +422,15 @@ const Profile = () => {
                 <div className="flex items-center gap-3 pt-4">
                   <button
                     type="submit"
-                    className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 sm:text-sm"
+                    disabled={saving}
+                    className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 sm:text-sm disabled:opacity-60"
                   >
-                    Save Changes
+                    {saving ? "Saving..." : "Save Changes"}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 sm:text-sm"
+                    className="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 sm:text-sm"
                   >
                     Cancel
                   </button>
@@ -357,7 +446,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-slate-950">{profile.name}</h2>
-                    <p className="text-sm font-semibold text-indigo-600">{profile.role} · {profile.department}</p>
+                    <p className="text-sm font-semibold text-indigo-600">{profile.role} · {profile.department} (Semester {profile.semester || "2.2"})</p>
                     <p className="text-xs text-slate-500 mt-0.5">{profile.institution}</p>
                   </div>
                 </div>
@@ -370,14 +459,16 @@ const Profile = () => {
                   </div>
                   <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Phone Number</span>
-                    <p className="mt-1 text-sm font-semibold text-slate-800">{profile.phone}</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-800">{profile.phone || "Not specified"}</p>
                   </div>
                 </div>
 
                 {/* Bio Section */}
                 <div>
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">About Me</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{profile.bio}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {profile.bio || "No bio specified yet. Click 'Edit Profile' to share what you're working on!"}
+                  </p>
                 </div>
 
                 {/* Skills Sections */}
@@ -385,22 +476,30 @@ const Profile = () => {
                   <div className="rounded-2xl border border-slate-300 bg-slate-50/60 p-5">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Skills Can Teach</h3>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {profile.skillsToTeach.map((skill, index) => (
-                        <span key={index} className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
-                          {skill}
-                        </span>
-                      ))}
+                      {profile.skillsToTeach && profile.skillsToTeach.length > 0 ? (
+                        profile.skillsToTeach.map((skill, index) => (
+                          <span key={index} className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-slate-400">No skills added yet</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="rounded-2xl border border-slate-300 bg-slate-50/60 p-5">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Skills Want to Learn</h3>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {profile.skillsToLearn.map((skill, index) => (
-                        <span key={index} className="rounded-full border border-slate-300 bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
-                          {skill}
-                        </span>
-                      ))}
+                      {profile.skillsToLearn && profile.skillsToLearn.length > 0 ? (
+                        profile.skillsToLearn.map((skill, index) => (
+                          <span key={index} className="rounded-full border border-slate-300 bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-slate-400">No skills added yet</span>
+                      )}
                     </div>
                   </div>
                 </div>

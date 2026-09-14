@@ -3,6 +3,11 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
 const protectedRoutes = require('./routes/exampleProtectedRoutes');
+const tagRoutes = require('./routes/tagRoutes');
+const userRoutes = require('./routes/userRoutes');
+const matchRoutes = require('./routes/matchRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 
@@ -46,6 +51,11 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/protected', protectedRoutes);
+app.use('/api/v1/tags', tagRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/matches', matchRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/messages', messageRoutes);
 
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });

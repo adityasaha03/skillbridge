@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node test/unitTest.js && node test/e2eAuthTest.js"
+    "seed": "node src/utils/seedData.js",
+    "test": "node test/unitTest.js && node test/matchingAlgorithmTest.js"
   },
   "keywords": [],
   "author": "",

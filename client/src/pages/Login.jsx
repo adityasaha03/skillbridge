@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { loginUser } from '../services/authService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+
+    try {
+      await loginUser({ email, password });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,6 +40,13 @@ const Login = () => {
             Please enter your university credentials to continue.
           </p>
         </div>
+
+        {/* Error Notification */}
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -64,11 +84,17 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.99] shadow-sm"
+            disabled={loading}
+            className="w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.99] shadow-sm disabled:opacity-60"
           >
-            Log In
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
+
+        {/* Demo Credentials Hint */}
+        <div className="rounded-lg bg-indigo-50/60 p-3 text-xs text-indigo-800 text-center border border-indigo-100">
+          Demo: <strong>rafi.cse@aust.edu</strong> | Pass: <strong>SkillBridge2026!</strong>
+        </div>
 
         {/* Footer Link */}
         <p className="text-center text-sm text-slate-600">

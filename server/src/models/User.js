@@ -74,6 +74,26 @@ const userSchema = new mongoose.Schema(
       default: '',
       maxlength: [500, 'Bio cannot exceed 500 characters'],
     },
+    semester: {
+      type: String,
+      default: '2.2',
+      trim: true,
+    },
+    institution: {
+      type: String,
+      default: 'Ahsanullah University of Science and Technology',
+      trim: true,
+    },
+    phone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    avatar: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     refreshTokens: {
       type: [refreshTokenSchema],
       default: [],
