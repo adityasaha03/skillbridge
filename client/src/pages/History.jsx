@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchMatchHistory } from "../services/matchService";
 import { fetchNotifications } from "../services/notificationService";
-import { logoutUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const History = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [history, setHistory] = useState([]);
   const [totalPeople, setTotalPeople] = useState(0);
   const [totalLearned, setTotalLearned] = useState(0);
@@ -49,7 +50,7 @@ const History = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      await logout();
     } finally {
       navigate("/login");
     }

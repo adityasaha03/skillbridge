@@ -7,6 +7,7 @@ const {
   hashToken,
 } = require('../utils/jwt');
 const { setAuthCookies, clearAuthCookies } = require('../utils/cookieHelper');
+const { getAccessTokenCookieOptions } = require('../config/cookieConfig');
 const { generateCsrfToken, setCsrfCookie } = require('../middleware/csrfMiddleware');
 
 const register = async (req, res) => {
@@ -172,7 +173,7 @@ const refreshToken = async (req, res) => {
       });
     }
 
-    const user = await User.findById(decoded.userId).select('+refreshTokens');
+    const user = await User.findById(decoded.userId).select('+refreshTokens +rotatedTokens');
     if (!user) {
       clearAuthCookies(res);
       return res.status(401).json({
@@ -182,12 +183,41 @@ const refreshToken = async (req, res) => {
     }
 
     const incomingHash = hashToken(incomingRefreshToken);
+    const now = new Date();
+
+    // Check if this token was recently rotated within grace period (e.g. 30s)
+    const wasRecentlyRotated = (user.rotatedTokens || []).some(
+      (t) => t.tokenHash === incomingHash && new Date(t.expiresAt) > now
+    );
+
+    if (wasRecentlyRotated) {
+      // Token was already rotated moments ago by a concurrent request from this client.
+      // Re-issue a fresh access token without invalidating user sessions.
+      const payload = {
+        userId: user._id.toString(),
+        email: user.email,
+        roles: user.roles,
+      };
+      const newAccessToken = signAccessToken(payload);
+      res.cookie('accessToken', newAccessToken, getAccessTokenCookieOptions());
+
+      const csrfToken = generateCsrfToken();
+      setCsrfCookie(res, csrfToken);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Tokens already rotated within grace period.',
+        csrfToken,
+      });
+    }
+
     const existingIndex = (user.refreshTokens || []).findIndex(
       (t) => t.tokenHash === incomingHash
     );
 
     if (existingIndex === -1) {
       user.refreshTokens = [];
+      user.rotatedTokens = [];
       await user.save();
       clearAuthCookies(res);
       return res.status(401).json({
@@ -199,7 +229,17 @@ const refreshToken = async (req, res) => {
 
     user.refreshTokens.splice(existingIndex, 1);
 
-    const now = new Date();
+    // Add old token to rotatedTokens with 30s grace window
+    const rotatedGraceExpiresAt = new Date(Date.now() + 30 * 1000);
+    const validRotatedTokens = (user.rotatedTokens || []).filter(
+      (t) => t.expiresAt && new Date(t.expiresAt) > now
+    );
+    validRotatedTokens.push({
+      tokenHash: incomingHash,
+      expiresAt: rotatedGraceExpiresAt,
+    });
+    user.rotatedTokens = validRotatedTokens;
+
     user.refreshTokens = user.refreshTokens.filter(
       (t) => t.expiresAt && new Date(t.expiresAt) > now
     );
@@ -223,9 +263,13 @@ const refreshToken = async (req, res) => {
 
     setAuthCookies(res, newAccessToken, newRefreshToken);
 
+    const csrfToken = generateCsrfToken();
+    setCsrfCookie(res, csrfToken);
+
     return res.status(200).json({
       success: true,
       message: 'Tokens rotated and refreshed successfully.',
+      csrfToken,
     });
   } catch (error) {
     console.error('[Refresh Error]:', error.message);

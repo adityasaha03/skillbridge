@@ -99,6 +99,22 @@ const userSchema = new mongoose.Schema(
       default: [],
       select: false,
     },
+    rotatedTokens: {
+      type: [
+        {
+          tokenHash: {
+            type: String,
+            required: true,
+          },
+          expiresAt: {
+            type: Date,
+            required: true,
+          },
+        },
+      ],
+      default: [],
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -113,6 +129,7 @@ userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.passwordHash;
   delete obj.refreshTokens;
+  delete obj.rotatedTokens;
   delete obj.__v;
   return obj;
 };

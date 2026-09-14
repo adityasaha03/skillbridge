@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchConversations, fetchMessages, sendChatMessage } from "../services/chatService";
 import { fetchNotifications } from "../services/notificationService";
-import { logoutUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const Chat = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [activeContactId, setActiveContactId] = useState(null);
   const [activeMessages, setActiveMessages] = useState([]);
@@ -114,7 +115,7 @@ const Chat = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      await logout();
     } finally {
       navigate("/login");
     }

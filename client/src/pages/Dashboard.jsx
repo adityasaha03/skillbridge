@@ -4,7 +4,7 @@ import { fetchTags } from "../services/tagService";
 import { fetchUserProfile, updateUserSkills } from "../services/userService";
 import { fetchReciprocalMatches, sendMatchRequest } from "../services/matchService";
 import { fetchNotifications } from "../services/notificationService";
-import { logoutUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 /* ---------------------------------------
    FALLBACK TOPICS TAXONOMY
@@ -149,6 +149,7 @@ const TopicSelector = ({
 ---------------------------------------- */
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [allTopics, setAllTopics] = useState(defaultTopics);
 
@@ -273,7 +274,7 @@ const Dashboard = () => {
   ---------------------------------------- */
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      await logout();
     } finally {
       navigate("/login");
     }

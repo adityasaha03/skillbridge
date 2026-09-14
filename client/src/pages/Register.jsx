@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
 const departments = [
   'Department of Architecture (ARCH)',
@@ -22,6 +23,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,13 +31,14 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await registerUser({
+      const res = await registerUser({
         fullName,
         email,
         studentId,
         department,
         password,
       });
+      login(res?.user);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed. Please check your details.');

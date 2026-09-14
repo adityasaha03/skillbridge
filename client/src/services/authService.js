@@ -76,21 +76,35 @@ export const loginUser = async ({ email, password }) => {
   return data;
 };
 
-export const refreshSession = async () => {
-  const res = await fetch('/api/v1/auth/refresh', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  });
+let refreshPromise = null;
 
-  const data = await safeJsonParse(res);
-  if (!res.ok) {
-    throw new Error(data.message || 'Session refresh failed');
+export const refreshSession = async () => {
+  if (refreshPromise) {
+    return refreshPromise;
   }
 
-  return data;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch('/api/v1/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      const data = await safeJsonParse(res);
+      if (!res.ok) {
+        throw new Error(data.message || 'Session refresh failed');
+      }
+
+      return data;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 };
 
 export const logoutUser = async () => {

@@ -6,10 +6,11 @@ import {
   markAllNotificationsAsRead,
 } from "../services/notificationService";
 import { acceptMatchRequest, declineMatchRequest } from "../services/matchService";
-import { logoutUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const Notification = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState("all");
@@ -85,7 +86,7 @@ const Notification = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      await logout();
     } finally {
       navigate("/login");
     }
