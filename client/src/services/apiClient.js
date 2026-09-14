@@ -38,6 +38,12 @@ export const apiRequest = async (endpoint, options = {}) => {
     }
   }
 
+  if (res.status === 401 && endpoint !== '/api/v1/auth/login') {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
+  }
+
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {

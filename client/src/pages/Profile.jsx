@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchUserProfile, updateUserProfile, updateUserSkills } from "../services/userService";
 import { fetchNotifications } from "../services/notificationService";
-import { logoutUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const initialProfile = {
   name: "Student",
@@ -19,6 +19,7 @@ const initialProfile = {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [profile, setProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(initialProfile);
@@ -149,7 +150,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      await logout();
     } finally {
       navigate("/login");
     }
