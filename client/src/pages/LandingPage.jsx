@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
+  const { user, loading, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Header */}
@@ -11,18 +14,40 @@ const LandingPage = () => {
             Skill<span className="text-indigo-600">Bridge</span>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-indigo-600 transition duration-150"
-            >
-              Log In
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition duration-150"
-            >
-              Sign Up
-            </Link>
+            {!loading && user ? (
+              <>
+                <span className="hidden sm:inline text-sm font-medium text-slate-600">
+                  Welcome, <strong className="text-slate-900">{user.fullName}</strong>
+                </span>
+                <Link
+                  to="/dashboard"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition duration-150"
+                >
+                  Dashboard →
+                </Link>
+                <button
+                  onClick={logout}
+                  className="px-3 py-2 text-sm font-semibold text-slate-600 hover:text-red-600 transition duration-150"
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-indigo-600 transition duration-150"
+                >
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition duration-150"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -40,18 +65,29 @@ const LandingPage = () => {
             Connect with university peers for reciprocal academic growth. Trade your strengths, master new subjects, and build your skill inventory.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
-            <Link
-              to="/login"
-              className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-700 active:scale-95 transition duration-150 text-center"
-            >
-              Get Started
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-400 active:scale-95 transition duration-150 text-center"
-            >
-              Create Account
-            </Link>
+            {!loading && user ? (
+              <Link
+                to="/dashboard"
+                className="rounded-lg bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow hover:bg-indigo-700 active:scale-95 transition duration-150 text-center"
+              >
+                Go to Your Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-700 active:scale-95 transition duration-150 text-center"
+                >
+                  Get Started
+                </Link>
+                <Link
+                  to="/register"
+                  className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-400 active:scale-95 transition duration-150 text-center"
+                >
+                  Create Account
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
