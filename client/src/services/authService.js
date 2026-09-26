@@ -1,7 +1,6 @@
-export const getCsrfTokenFromCookie = () => {
-  const match = document.cookie.match(new RegExp('(^| )_csrf=([^;]+)'));
-  return match ? match[2] : null;
-};
+import { resolveApiUrl, getCsrfTokenFromCookie, setCachedCsrfToken } from './apiConfig';
+
+export { getCsrfTokenFromCookie };
 
 const safeJsonParse = async (res) => {
   const text = await res.text();
@@ -14,12 +13,15 @@ const safeJsonParse = async (res) => {
 
 export const fetchCsrfToken = async () => {
   try {
-    const res = await fetch('/api/v1/auth/csrf-token', {
+    const res = await fetch(resolveApiUrl('/api/v1/auth/csrf-token'), {
       method: 'GET',
       credentials: 'include',
     });
     if (!res.ok) return null;
     const data = await safeJsonParse(res);
+    if (data.csrfToken) {
+      setCachedCsrfToken(data.csrfToken);
+    }
     return data.csrfToken || null;
   } catch (err) {
     console.error('Failed to fetch CSRF token:', err);
@@ -28,9 +30,13 @@ export const fetchCsrfToken = async () => {
 };
 
 export const registerUser = async ({ fullName, email, studentId, department, password }) => {
-  const csrfToken = getCsrfTokenFromCookie() || (await fetchCsrfToken());
+  let csrfToken = getCsrfTokenFromCookie();
+  if (!csrfToken) {
+    csrfToken = await fetchCsrfToken();
+    if (csrfToken) setCachedCsrfToken(csrfToken);
+  }
 
-  const res = await fetch('/api/v1/auth/register', {
+  const res = await fetch(resolveApiUrl('/api/v1/auth/register'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -53,9 +59,13 @@ export const registerUser = async ({ fullName, email, studentId, department, pas
 };
 
 export const loginUser = async ({ email, password }) => {
-  const csrfToken = getCsrfTokenFromCookie() || (await fetchCsrfToken());
+  let csrfToken = getCsrfTokenFromCookie();
+  if (!csrfToken) {
+    csrfToken = await fetchCsrfToken();
+    if (csrfToken) setCachedCsrfToken(csrfToken);
+  }
 
-  const res = await fetch('/api/v1/auth/login', {
+  const res = await fetch(resolveApiUrl('/api/v1/auth/login'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -85,7 +95,7 @@ export const refreshSession = async () => {
 
   refreshPromise = (async () => {
     try {
-      const res = await fetch('/api/v1/auth/refresh', {
+      const res = await fetch(resolveApiUrl('/api/v1/auth/refresh'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,9 +118,13 @@ export const refreshSession = async () => {
 };
 
 export const logoutUser = async () => {
-  const csrfToken = getCsrfTokenFromCookie() || (await fetchCsrfToken());
+  let csrfToken = getCsrfTokenFromCookie();
+  if (!csrfToken) {
+    csrfToken = await fetchCsrfToken();
+    if (csrfToken) setCachedCsrfToken(csrfToken);
+  }
 
-  const res = await fetch('/api/v1/auth/logout', {
+  const res = await fetch(resolveApiUrl('/api/v1/auth/logout'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -124,7 +138,7 @@ export const logoutUser = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const res = await fetch('/api/v1/auth/me', {
+  const res = await fetch(resolveApiUrl('/api/v1/auth/me'), {
     method: 'GET',
     credentials: 'include',
   });
@@ -132,7 +146,7 @@ export const getCurrentUser = async () => {
   if (res.status === 401) {
     try {
       await refreshSession();
-      const retryRes = await fetch('/api/v1/auth/me', {
+      const retryRes = await fetch(resolveApiUrl('/api/v1/auth/me'), {
         method: 'GET',
         credentials: 'include',
       });

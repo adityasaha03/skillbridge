@@ -1,7 +1,8 @@
 const crypto = require('crypto');
 
 const isProduction = process.env.NODE_ENV === 'production';
-const sameSitePolicy = process.env.COOKIE_SAMESITE || 'lax';
+const sameSitePolicy = (process.env.COOKIE_SAMESITE || 'lax').toLowerCase();
+const isSecure = isProduction || sameSitePolicy === 'none';
 
 const generateCsrfToken = () => {
   return crypto.randomBytes(32).toString('hex');
@@ -10,7 +11,7 @@ const generateCsrfToken = () => {
 const setCsrfCookie = (res, token) => {
   res.cookie('_csrf', token, {
     httpOnly: false,
-    secure: isProduction,
+    secure: isSecure,
     sameSite: sameSitePolicy,
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000,

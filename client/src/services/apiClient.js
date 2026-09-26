@@ -1,4 +1,5 @@
-import { getCsrfTokenFromCookie, fetchCsrfToken, refreshSession } from './authService';
+import { fetchCsrfToken, refreshSession } from './authService';
+import { resolveApiUrl, getCsrfTokenFromCookie, setCachedCsrfToken } from './apiConfig';
 
 export const apiRequest = async (endpoint, options = {}) => {
   const method = (options.method || 'GET').toUpperCase();
@@ -8,7 +9,11 @@ export const apiRequest = async (endpoint, options = {}) => {
   };
 
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    const csrfToken = getCsrfTokenFromCookie() || (await fetchCsrfToken());
+    let csrfToken = getCsrfTokenFromCookie();
+    if (!csrfToken) {
+      csrfToken = await fetchCsrfToken();
+      if (csrfToken) setCachedCsrfToken(csrfToken);
+    }
     if (csrfToken) {
       headers['x-csrf-token'] = csrfToken;
     }
@@ -21,7 +26,8 @@ export const apiRequest = async (endpoint, options = {}) => {
     credentials: 'include',
   };
 
-  let res = await fetch(endpoint, config);
+  const url = resolveApiUrl(endpoint);
+  let res = await fetch(url, config);
 
   // If unauthorized, attempt to refresh session and retry once
   if (res.status === 401 && endpoint !== '/api/v1/auth/refresh' && endpoint !== '/api/v1/auth/login') {
@@ -29,10 +35,14 @@ export const apiRequest = async (endpoint, options = {}) => {
       await refreshSession();
       // Update CSRF token for retry if applicable
       if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-        const newCsrf = getCsrfTokenFromCookie() || (await fetchCsrfToken());
+        let newCsrf = getCsrfTokenFromCookie();
+        if (!newCsrf) {
+          newCsrf = await fetchCsrfToken();
+          if (newCsrf) setCachedCsrfToken(newCsrf);
+        }
         if (newCsrf) headers['x-csrf-token'] = newCsrf;
       }
-      res = await fetch(endpoint, { ...config, headers });
+      res = await fetch(url, { ...config, headers });
     } catch {
       // Refresh failed, return original 401
     }
