@@ -7,7 +7,10 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "seed": "node src/utils/seedData.js",
-    "test": "node test/unitTest.js && node test/matchingAlgorithmTest.js"
+    "test": "node test/unitTest.js && node test/matchingAlgorithmTest.js && node test/apiIntegrationTest.js && node test/matchmakingStressTest.js",
+    "test:unit": "node test/unitTest.js && node test/matchingAlgorithmTest.js",
+    "test:integration": "node test/apiIntegrationTest.js",
+    "test:stress": "node test/matchmakingStressTest.js"
   },
   "keywords": [],
   "author": "",
