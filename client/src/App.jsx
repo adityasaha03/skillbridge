@@ -9,6 +9,7 @@ import History from "./pages/History";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 import Notifications from "./pages/Notifications";
+import CarbonFootprintDisplay from "./components/CarbonFootprintDisplay";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
           </Route>
         </Routes>
+        <CarbonFootprintDisplay />
       </AuthProvider>
     </Router>
   );

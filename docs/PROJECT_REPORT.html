@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillBridge – Project Report | CSE-2200 | AUST</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #0284c7;
+      --header-bg: #1e3a8a;
+      --table-stripe: #f8fafc;
+      --border-color: #cbd5e1;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9.8pt;
+      line-height: 1.42;
+      color: var(--text-main);
+      background-color: #cbd5e1;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .document-container {
+      max-width: 210mm;
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .page {
+      background: #ffffff;
+      width: 210mm;
+      height: 297mm;
+      min-height: 297mm;
+      max-height: 297mm;
+      padding: 15mm 20mm 14mm 20mm;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Running Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5px;
+      border-bottom: 1.5px solid var(--border-color);
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .page-header .brand {
+      color: var(--primary-color);
+      font-weight: 700;
+    }
+
+    /* Running Footer */
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 5px;
+      border-top: 1.5px solid var(--border-color);
+      font-size: 8.5pt;
+      color: var(--text-muted);
+    }
+
+    /* Content Area */
+    .page-content {
+      flex: 1;
+      padding: 8px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Headings */
+    h1.section-title {
+      font-size: 13pt;
+      font-weight: 800;
+      color: var(--primary-color);
+      padding-bottom: 2px;
+      border-bottom: 1.5px solid var(--primary-color);
+      margin-top: 4px;
+      margin-bottom: 3px;
+      letter-spacing: -0.01em;
+    }
+
+    h2.subsection-title {
+      font-size: 10.2pt;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
+
+    h3.feature-title {
+      font-size: 9.6pt;
+      font-weight: 700;
+      color: #0369a1;
+      margin-top: 3px;
+      margin-bottom: 1px;
+    }
+
+    p {
+      text-align: justify;
+      margin-bottom: 2px;
+      color: #334155;
+    }
+
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 2px;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 13px;
+      margin-bottom: 2px;
+      color: #334155;
+      text-align: justify;
+    }
+
+    ul li::before {
+      content: "•";
+      position: absolute;
+      left: 1px;
+      color: var(--accent-color);
+      font-weight: bold;
+      font-size: 11pt;
+      line-height: 1;
+    }
+
+    ul li strong {
+      color: var(--primary-color);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.3pt;
+      margin: 3px 0;
+    }
+
+    table th {
+      background-color: var(--header-bg);
+      color: #ffffff;
+      font-weight: 700;
+      text-align: left;
+      padding: 4.5px 7px;
+      border: 1px solid var(--header-bg);
+    }
+
+    table td {
+      padding: 3.5px 7px;
+      border: 1px solid var(--border-color);
+      vertical-align: middle;
+      color: #334155;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: var(--table-stripe);
+    }
+
+    .formula-box {
+      background: #f1f5f9;
+      border-left: 3px solid var(--accent-color);
+      padding: 4px 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 8pt;
+      color: #0f172a;
+      border-radius: 0 4px 4px 0;
+      margin: 2px 0;
+    }
+
+    /* Cover Page Styling */
+    .cover-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      text-align: center;
+      padding: 10px 4px;
+    }
+
+    .cover-inst-title {
+      font-size: 15.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .cover-dept-title {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #334155;
+      margin-top: 3px;
+    }
+
+    .cover-course-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 14px;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 700;
+      font-size: 9.5pt;
+      border-radius: 20px;
+      border: 1px solid #bae6fd;
+    }
+
+    .cover-project-box {
+      margin: 18px 0;
+      padding: 20px 16px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+    }
+
+    .cover-proj-heading {
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .cover-proj-title {
+      font-size: 26pt;
+      font-weight: 900;
+      color: #1e3a8a;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .cover-proj-subtitle {
+      font-size: 10pt;
+      color: #475569;
+      margin-top: 6px;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.35;
+    }
+
+    .cover-group-badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 16px;
+      background: #1e3a8a;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 10pt;
+      border-radius: 6px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+      text-align: left;
+      margin-top: 6px;
+      font-size: 8.5pt;
+    }
+
+    .cover-meta-card {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cover-meta-card h4 {
+      font-size: 9pt;
+      color: #0f172a;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cover-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.2pt;
+      margin: 2px 0 6px 0;
+    }
+
+    .cover-table th {
+      background-color: #f1f5f9;
+      color: #1e293b;
+      font-weight: 700;
+      padding: 3px 6px;
+      border: 1px solid #cbd5e1;
+      text-align: left;
+    }
+
+    .cover-table td {
+      padding: 3px 6px;
+      border: 1px solid #cbd5e1;
+      vertical-align: middle;
+      color: #334155;
+    }
+
+    .font-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 8pt;
+      letter-spacing: 0.02em;
+    }
+
+    .cover-sub-text {
+      font-size: 7.8pt;
+      color: #64748b;
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+
+    .cover-instructors-box {
+      font-size: 8.5pt;
+      color: #334155;
+      line-height: 1.45;
+    }
+
+    .cover-submission-date {
+      margin-top: 10px;
+      font-size: 8.8pt;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* Print Specific Rules */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media print {
+
+      html,
+      body {
+        width: 210mm;
+        height: auto;
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .document-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        gap: 0 !important;
+      }
+
+      .page {
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
+        max-height: 297mm !important;
+        padding: 15mm 20mm 14mm 20mm !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        overflow: hidden !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Floating Print Button */
+    .print-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: white;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 9999;
+      cursor: pointer;
+      border: 1px solid #334155;
+      transition: all 0.2s ease;
+    }
+
+    .print-bar:hover {
+      background: #1e293b;
+      transform: translateX(-50%) translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Floating Print Trigger -->
+  <button class="print-bar no-print" onclick="window.print()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+      <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+    <span>Print Report / Save as PDF (Hard & Soft Copy)</span>
+  </button>
+
+  <div class="document-container">
+
+    <!-- ================= COVER PAGE (PAGE 1) ================= -->
+    <div class="page" id="page-cover">
+      <div class="cover-container">
+        <div>
+          <div class="cover-inst-title">Ahsanullah University of Science and Technology</div>
+          <div class="cover-dept-title">Department of Computer Science and Engineering</div>
+          <div class="cover-course-badge">CSE-2200: Software Development IV</div>
+        </div>
+
+        <div class="cover-project-box">
+          <div class="cover-proj-heading">Comprehensive Project Report</div>
+          <div class="cover-proj-title">SkillBridge</div>
+          <div class="cover-proj-subtitle">
+            A Reciprocal Peer-to-Peer Academic Skill Exchange Platform for University Students
+          </div>
+          <div class="cover-group-badge">
+            Group Number: 01
+          </div>
+        </div>
+
+        <div>
+          <div class="cover-meta-grid">
+            <div class="cover-meta-card">
+              <h4>Submitted By (Group 01)</h4>
+              <table class="cover-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Aditya Saha</strong></td>
+                    <td class="font-mono">00724105101007</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Mrinmoy Shib</strong></td>
+                    <td class="font-mono">00724105101010</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Shirsho Chowdhury</strong></td>
+                    <td class="font-mono">00724105101019</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="cover-sub-text">
+                Program: B.Sc. in Computer Science and Engineering (CSE)<br>
+                Department of Computer Science and Engineering, AUST
+              </div>
+            </div>
+            <div class="cover-meta-card">
+              <h4>Submitted To</h4>
+              <div class="cover-instructors-box">
+                <p style="font-weight: 700; color: #0f172a; margin-bottom: 5px;">Course Instructors:</p>
+                <div
+                  style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 8px; margin-bottom: 5px;">
+                  <p style="font-weight: 700; color: #1e3a8a; font-size: 8.8pt;">Ashek Seum</p>
+                  <p style="font-size: 7.8pt; color: #64748b;">Course Instructor, Department of CSE</p>
+                </div>
+                <div
+                  style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 8px; margin-bottom: 5px;">
+                  <p style="font-weight: 700; color: #1e3a8a; font-size: 8.8pt;">Atiqur Rahman</p>
+                  <p style="font-size: 7.8pt; color: #64748b;">Course Instructor, Department of CSE</p>
+                </div>
+                <p style="font-size: 7.8pt; color: #475569; line-height: 1.3; margin-top: 2px;">
+                  Department of Computer Science & Engineering<br>
+                  Ahsanullah University of Science and Technology
+                </p>
+              </div>
+              <div class="cover-sub-text" style="margin-top: 4px; border-top: 1px dashed #cbd5e1; padding-top: 3px;">
+                Academic Session: 2026–2027
+              </div>
+            </div>
+          </div>
+
+          <div class="cover-submission-date">
+            <strong>Submission Date:</strong> Sunday, September 2026 &nbsp;|&nbsp; <strong>Course:</strong> CSE-2200
+            (Software Development IV)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PAGE 2 ================= -->
+    <div class="page" id="page-2">
+      <div class="page-header">
+        <span class="brand">SkillBridge – Project Report</span>
+        <span>CSE-2200 | AUST</span>
+      </div>
+
+      <div class="page-content">
+        <h1 class="section-title">1. Problem Statement</h1>
+        <p>
+          SkillBridge was conceived to address the persistent challenges faced by individuals seeking academic peer
+          tutoring and collaborative learning within higher education institutions like Ahsanullah University of Science
+          and Technology (AUST). The platform targets three primary user groups affected by an inefficient, fragmented
+          academic assistance ecosystem.
+        </p>
+
+        <h2 class="subsection-title">1.1 Affected Stakeholders</h2>
+        <ul>
+          <li><strong>Peer Learners</strong> – Students facing challenging coursework (e.g., Algorithms, Web Dev, OOP)
+            who face time-consuming searches and a lack of accessible 1-on-1 mentoring.</li>
+          <li><strong>Peer Mentors</strong> – Proficient students willing to mentor peers who lack structured avenues to
+            identify compatible study partners without sacrificing their own study goals.</li>
+          <li><strong>Faculty & Instructors</strong> – Educators observing learning bottlenecks across cohorts who have
+            limited office hours to provide customized tutoring to every struggling student.</li>
+        </ul>
+
+        <h2 class="subsection-title">1.2 Current Challenges</h2>
+        <ul>
+          <li>Time-consuming searches requiring manual coordination across informal friend groups.</li>
+          <li>Lack of centralized platform with complete, filterable syllabus topics and skill tags.</li>
+          <li>Financial barriers created by commercial tutoring platforms charging hourly rates.</li>
+          <li>Asymmetric skill exchanges causing mentor burnout due to lack of reciprocal support.</li>
+          <li>Communication and pacing barriers between students across different semesters.</li>
+        </ul>
+
+        <h2 class="subsection-title">1.3 Insufficiency of Existing Solutions</h2>
+        <p>Existing approaches fall short in key areas:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 28%;">Channel</th>
+              <th>Limitation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Word-of-mouth</strong></td>
+              <td>Limited reach, highly informal, no verification of subject competence.</td>
+            </tr>
+            <tr>
+              <td><strong>Social media groups</strong></td>
+              <td>Poor search and filter capabilities; listings quickly buried in feeds.</td>
+            </tr>
+            <tr>
+              <td><strong>Commercial tutoring</strong></td>
+              <td>Added fees, focus on profit, misaligned with specific university syllabi.</td>
+            </tr>
+            <tr>
+              <td><strong>General online courses</strong></td>
+              <td>Impersonal, pre-recorded content lacking direct 1-to-1 peer interaction.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h1 class="section-title">2. System Design</h1>
+        <p>
+          The system follows a modern three-tier client-server architecture built on the MERN stack (MongoDB,
+          Express.js, React.js, Node.js). Its decoupled design allows the frontend to operate independently while
+          communicating with backend services via RESTful APIs and encrypted session credentials.
+        </p>
+
+        <h2 class="subsection-title">2.1 Frontend – Client Tier</h2>
+        <ul>
+          <li>Single Page Application (SPA) built with React 19, initialized via Vite for fast development and optimized
+            production builds.</li>
+          <li>React Router enables seamless client-side navigation without full-page reloads.</li>
+          <li>Protected components (<code>&lt;ProtectedRoute&gt;</code>) isolate authenticated views from public
+            onboarding pages.</li>
+        </ul>
+
+        <h2 class="subsection-title">2.2 Backend – Application Tier</h2>
+        <ul>
+          <li>RESTful API built with Node.js and Express 5 handles all core business logic.</li>
+          <li>Non-blocking asynchronous I/O execution guarantees high concurrency and responsive throughput.</li>
+        </ul>
+      </div>
+
+      <div class="page-footer">
+        <span>Department of CSE, Ahsanullah University of Science and Technology</span>
+        <span>Page 2</span>
+      </div>
+    </div>
+
+    <!-- ================= PAGE 3 ================= -->
+    <div class="page" id="page-3">
+      <div class="page-header">
+        <span class="brand">SkillBridge – Project Report</span>
+        <span>CSE-2200 | AUST</span>
+      </div>
+
+      <div class="page-content">
+        <h2 class="subsection-title" style="margin-top: 0;">2.3 Database – Data Tier</h2>
+        <ul>
+          <li>MongoDB document database provides a flexible schema suitable for student profiles and skill taxonomies.
+          </li>
+          <li>Mongoose ODM defines and manages relationships between Users, Tags, Matches, Messages, and Notifications.
+          </li>
+        </ul>
+
+        <h2 class="subsection-title">2.4 Authentication & Security</h2>
+        <ul>
+          <li>Stateless JWT-based authentication ensures scalable, sessionless security (15-minute access tokens).</li>
+          <li>HTTP-only SameSite=Lax cookies store refresh tokens, mitigating Cross-Site Scripting (XSS) attack
+            surfaces.</li>
+          <li>Passwords are securely hashed using the bcryptjs algorithm with adaptive salt rounds.</li>
+          <li>Double-submit CSRF protection validates all state-modifying requests (<code>POST</code>, <code>PUT</code>,
+            <code>DELETE</code>).
+          </li>
+          <li>Payload limiters (10kb) and strict CORS origin whitelisting defend against DoS and unauthorized
+            cross-origin requests.</li>
+          <li>Credential masking middleware redacts tokens and sensitive data from application logs.</li>
+        </ul>
+
+        <h2 class="subsection-title">2.5 Matchmaking & Real-Time Communication Layer</h2>
+        <p>
+          To support equitable peer collaboration, SkillBridge integrates dedicated services for reciprocal pairing and
+          messaging:
+        </p>
+        <ul>
+          <li><strong>2-Cycle Reciprocal Matchmaker</strong> evaluates bipartite complementarity to ensure mutual
+            academic value before pair generation.</li>
+          <li><strong>Match-Scoped Messaging Engine</strong> guarantees private 1-to-1 communication channels restricted
+            to approved study matches.</li>
+          <li><strong>Deep-Link URL Resolvers</strong> (<code>/chat?peerId=...&matchId=...</code>) ensure seamless state
+            transitions across views.</li>
+        </ul>
+
+        <h1 class="section-title">3. Implementation Details</h1>
+
+        <h2 class="subsection-title">3.1 Technology Stack</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 22%;">Layer</th>
+              <th style="width: 32%;">Technology</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Frontend</strong></td>
+              <td>React 19 + Vite 8</td>
+              <td>Component-based UI, fast HMR, optimized production builds.</td>
+            </tr>
+            <tr>
+              <td><strong>Styling</strong></td>
+              <td>Tailwind CSS v4</td>
+              <td>Utility-first responsive design, modern badge UI, zero runtime overhead.</td>
+            </tr>
+            <tr>
+              <td><strong>Routing</strong></td>
+              <td>React Router v7</td>
+              <td>Client-side navigation and protected authentication routes.</td>
+            </tr>
+            <tr>
+              <td><strong>Backend</strong></td>
+              <td>Node.js + Express 5</td>
+              <td>RESTful API, asynchronous business logic, modular middleware.</td>
+            </tr>
+            <tr>
+              <td><strong>Database</strong></td>
+              <td>MongoDB + Mongoose 9</td>
+              <td>Flexible document storage, typed schemas, relationship population.</td>
+            </tr>
+            <tr>
+              <td><strong>Auth</strong></td>
+              <td>JWT + bcryptjs</td>
+              <td>Stateless authentication (15m access / 7d refresh), secure password hashing.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="page-footer">
+        <span>Department of CSE, Ahsanullah University of Science and Technology</span>
+        <span>Page 3</span>
+      </div>
+    </div>
+
+    <!-- ================= PAGE 4 ================= -->
+    <div class="page" id="page-4">
+      <div class="page-header">
+        <span class="brand">SkillBridge – Project Report</span>
+        <span>CSE-2200 | AUST</span>
+      </div>
+
+      <div class="page-content">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 22%;">Layer</th>
+              <th style="width: 32%;">Technology</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Security</strong></td>
+              <td>Double-Submit CSRF + Cookies</td>
+              <td>Defense-in-depth protection against XSS, CSRF, and payload inflation.</td>
+            </tr>
+            <tr>
+              <td><strong>Sustainability</strong></td>
+              <td>@tgwf/co2</td>
+              <td>Carbon emission estimation per HTTP session (SWD model).</td>
+            </tr>
+            <tr>
+              <td><strong>Client Eco-Track</strong></td>
+              <td>react-carbon-footprint</td>
+              <td>Real-time client-side network byte and CO₂ emission monitoring.</td>
+            </tr>
+            <tr>
+              <td><strong>Testing</strong></td>
+              <td>Node.js Assert Harness</td>
+              <td>Automated unit tests, token validation, and matchmaking algorithm tests.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 class="subsection-title">3.2 Core Feature Implementation</h2>
+
+        <h3 class="feature-title">User Authentication & Dual-Token Security</h3>
+        <ul>
+          <li>The <code>/api/v1/auth</code> endpoints verify credentials, evaluate bcrypt hashes, and issue short-lived
+            access JWTs paired with long-lived HTTP-only refresh cookies.</li>
+          <li>All protected API requests validate the access token on each call; automatic silent refresh preserves
+            sessions seamlessly.</li>
+        </ul>
+
+        <h3 class="feature-title">Reciprocal 2-Cycle Matchmaking Engine</h3>
+        <ul>
+          <li>Unlike conventional one-way tutor discovery systems, SkillBridge strictly enforces <strong>2-cycle
+              academic reciprocity</strong>:
+            <div class="formula-box">
+              Overlap_Teach = UserA.strongTags ∩ UserB.weakTags ≠ ∅<br>
+              Overlap_Learn = UserB.strongTags ∩ UserA.weakTags ≠ ∅
+            </div>
+          </li>
+          <li>Eligible candidates are ranked by a multi-factor compatibility scoring formula:
+            <div class="formula-box">
+              Score = (|Overlap_Teach| × 3) + (|Overlap_Learn| × 3) - (|ΔSemester| × 1) + (SameDeptBonus × 2)
+            </div>
+          </li>
+          <li>Exclusion filters automatically omit self-matches, existing pending requests, and already accepted
+            connections.</li>
+        </ul>
+
+        <h3 class="feature-title">Academic Taxonomy & Student Profile Management</h3>
+        <ul>
+          <li>Students customize profiles with department, semester, bio, and weekly availability schedules.</li>
+          <li>Taxonomy tags span core domains: <em>Languages, Web Dev, Mobile Dev, Core CS, and AI/Data Science</em>.
+            Dynamic tag resolution allows instant creation of new syllabus-specific tags.</li>
+        </ul>
+
+        <h3 class="feature-title">Real-Time 1-to-1 Peer Chat</h3>
+        <ul>
+          <li>Enforces match-scoped message storage referencing <code>matchId</code>, sender, recipient, timestamp, and
+            read status.</li>
+          <li>Features conversation search filtering, unread counter badges, and deep-link query parameter parsing
+            (<code>/chat?peerId=...</code>).</li>
+        </ul>
+
+        <h3 class="feature-title">Carbon Tracking Middleware</h3>
+        <ul>
+          <li>An Express middleware intercepts responses and measures total bytes transferred per session (body,
+            headers, queries).</li>
+          <li>Emissions are estimated using the <code>@tgwf/co2</code> model, converting byte counts to CO₂ grams.</li>
+          <li>Example session measurement: 17,722 bytes transferred, resulting in approximately 0.0026 to 0.0068 grams
+            of CO₂ (~3–7 mg per session).</li>
+        </ul>
+      </div>
+
+      <div class="page-footer">
+        <span>Department of CSE, Ahsanullah University of Science and Technology</span>
+        <span>Page 4</span>
+      </div>
+    </div>
+
+    <!-- ================= PAGE 5 ================= -->
+    <div class="page" id="page-5">
+      <div class="page-header">
+        <span class="brand">SkillBridge – Project Report</span>
+        <span>CSE-2200 | AUST</span>
+      </div>
+
+      <div class="page-content">
+        <h3 class="feature-title" style="margin-top: 0;">Security Middleware Stack</h3>
+        <ul>
+          <li>A custom authentication middleware enforces token verification on all protected endpoints, preventing
+            unauthorized resource access.</li>
+          <li>Double-submit CSRF verification rejects state mutations lacking valid matching tokens, complemented by a
+            strict CORS policy whitelisting only verified frontend origins.</li>
+          <li>35 automated tests validate system integrity (25 unit/security tests and 10 matchmaking algorithm tests).
+          </li>
+        </ul>
+
+        <h1 class="section-title">4. Societal Impact Analysis</h1>
+
+        <h2 class="subsection-title">4.1 Impact on Peer Learners</h2>
+        <ul>
+          <li><strong>Saves Significant Study Time</strong> by eliminating inefficient, unorganized manual searches
+            across informal chat groups.</li>
+          <li><strong>Provides Comprehensive Syllabus Matching</strong> including exact course topics, programming
+            languages, and peer availability.</li>
+          <li><strong>Eliminates Exploitative Tutoring Fees</strong> by establishing an equitable, barter-based
+            reciprocal skill exchange.</li>
+          <li><strong>Direct Peer Communication</strong> reduces anxiety, allowing students to ask foundational
+            questions in a supportive environment.</li>
+        </ul>
+
+        <h2 class="subsection-title">4.2 Impact on Peer Mentors</h2>
+        <ul>
+          <li><strong>Reinforces Knowledge via the Protégé Effect</strong>: Mentoring peers deepens the mentor's
+            conceptual mastery and debugging intuition.</li>
+          <li><strong>Guarantees Reciprocal Assistance</strong>: Ensures high-performing students receive help in their
+            own growth areas, preventing burnout.</li>
+          <li><strong>Cultivates Leadership Skills</strong>: Builds interpersonal communication, code review abilities,
+            and professional mentorship habits.</li>
+        </ul>
+
+        <h2 class="subsection-title">4.3 Broader Community Benefits</h2>
+        <ul>
+          <li><strong>Promotes a Collaborative Campus Culture</strong>: Fosters mutual support rather than zero-sum
+            academic competition at AUST.</li>
+          <li><strong>Bridges Departmental & Semester Silos</strong>: Connects junior and senior students across
+            computing disciplines.</li>
+          <li><strong>Improves Course Retention</strong>: Provides an accessible safety net for challenging gateway
+            courses like Algorithms and OOP.</li>
+        </ul>
+
+        <h1 class="section-title">5. Carbon Footprint Analysis</h1>
+        <p>
+          SkillBridge incorporates Sustainable Web Design principles directly into its server architecture. This
+          reflects a commitment to environmentally responsible digital services.
+        </p>
+
+        <h2 class="subsection-title">5.1 Methodology</h2>
+        <ul>
+          <li>An Express.js middleware intercepts all outgoing HTTP responses and incoming payloads, measuring bytes
+            transferred.</li>
+          <li>The <code>@tgwf/co2</code> library converts byte transfer data into estimated CO₂ emissions using the
+            Sustainable Web Design (SWD) model.</li>
+          <li>The frontend integrates <code>react-carbon-footprint</code> to monitor client network transfer and render
+            a live eco-indicator.</li>
+          <li>Carbon data is logged per session and attached as response headers (<code>X-Bytes-Transferred</code>,
+            <code>X-Estimated-CO2-Grams</code>).
+          </li>
+        </ul>
+      </div>
+
+      <div class="page-footer">
+        <span>Department of CSE, Ahsanullah University of Science and Technology</span>
+        <span>Page 5</span>
+      </div>
+    </div>
+
+    <!-- ================= PAGE 6 ================= -->
+    <div class="page" id="page-6">
+      <div class="page-header">
+        <span class="brand">SkillBridge – Project Report</span>
+        <span>CSE-2200 | AUST</span>
+      </div>
+
+      <div class="page-content">
+        <h2 class="subsection-title" style="margin-top: 0;">5.2 Measurement Example</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 46%;">Metric / Scenario</th>
+              <th style="width: 26%;">Data Transferred</th>
+              <th>Estimated CO₂</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bytes Transferred (session benchmark)</strong></td>
+              <td>17,722 bytes</td>
+              <td>0.0026–0.0068 g (~3–7 mg)</td>
+            </tr>
+            <tr>
+              <td><strong>Discovery Dashboard Feed & Tags</strong></td>
+              <td>14,680 bytes</td>
+              <td>0.0022 grams (~2.2 mg)</td>
+            </tr>
+            <tr>
+              <td><strong>Active Peer Chat (15 Real-time Msgs)</strong></td>
+              <td>18,450 bytes</td>
+              <td>0.0027 grams (~2.7 mg)</td>
+            </tr>
+            <tr>
+              <td><strong>Production SPA Bundle (Vite Gzipped)</strong></td>
+              <td>113,740 bytes</td>
+              <td>0.0168 grams (~16.8 mg)</td>
+            </tr>
+            <tr>
+              <td><strong>Typical End-to-End User Session</strong></td>
+              <td>24,200 bytes</td>
+              <td>0.0036 grams (~3.6 mg)</td>
+            </tr>
+            <tr>
+              <td><strong>Sustainability Model</strong></td>
+              <td colspan="2">@tgwf/co2 & react-carbon-footprint (SWD Model)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 class="subsection-title">5.3 Environmental Significance</h2>
+        <ul>
+          <li><strong>Demonstrates Digital Carbon Awareness</strong>: Demonstrates that web applications can be built
+            with explicit awareness of their carbon footprint.</li>
+          <li><strong>Encourages Efficient Data Transfer</strong>: Encourages efficient data transfer practices,
+            reducing unnecessary payload sizes.</li>
+          <li><strong>Vite 8 Build Optimization</strong>: Code-splitting and Rollup tree-shaking compress production
+            assets by over 73%, directly reducing global transmission emissions.</li>
+          <li><strong>Positions SkillBridge as an Eco-Conscious Model</strong>: Serves as a model for eco-conscious
+            software development within the local tech ecosystem.</li>
+        </ul>
+
+        <h1 class="section-title">6. Conclusion</h1>
+        <p>
+          SkillBridge represents a meaningful step toward solving a well-documented, real-world problem in university
+          academic environments. By consolidating peer discovery, mutual skill verification, direct messaging, and
+          exchange tracking into a single cohesive platform, it delivers clear and measurable value to peer learners,
+          student mentors, and the broader university community.
+        </p>
+        <p>
+          Built on a robust MERN stack with JWT-secured dual-token authentication, real-time messaging, and cloud-based
+          data management, the technical implementation reflects industry best practices in modern web development. The
+          mathematical formulation of the 2-cycle reciprocal matchmaking engine ensures that academic cooperation is
+          fundamentally equitable, structured, and mutually beneficial.
+        </p>
+        <p>
+          The integration of carbon footprint tracking via an Express middleware and the
+          <code>react-carbon-footprint</code> client library goes beyond functionality, demonstrating a commitment to
+          environmentally responsible engineering — a distinction that sets SkillBridge apart from comparable platforms.
+        </p>
+        <p>
+          The platform does not merely replicate existing communication tools; it addresses their specific shortcomings
+          by providing categorized syllabus filtering, verified bilateral matching, private communication channels, and
+          a transparent learning exchange that empowers students to learn together sustainably.
+        </p>
+
+        <div
+          style="margin-top: 14px; padding: 10px 14px; background: #f8fafc; border: 1.5px dashed var(--border-color); border-radius: 8px;">
+          <div style="font-weight: 700; color: var(--primary-color); margin-bottom: 4px; font-size: 9pt;">
+            Course Evaluation & Verification Summary
+          </div>
+          <table style="margin: 0; font-size: 8.2pt;">
+            <tbody>
+              <tr>
+                <td style="width: 32%; font-weight: 600;">Course</td>
+                <td>CSE-2200: Software Development IV / Web Development</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">Institution</td>
+                <td>Department of Computer Science and Engineering, Ahsanullah University of Science and Technology</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">Deliverables</td>
+                <td>Hard Copy & Soft Copy Report (Problem Statement, System Design, Implementation, Societal Impact,
+                  Carbon Footprint)</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">Automated Test Suite</td>
+                <td>35 Passing Tests (25 Unit & Security Tests, 10 Matchmaking Algorithm Tests)</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">Sustainability Model</td>
+                <td>Sustainable Web Design (SWD) Model via <code>@tgwf/co2</code> and
+                  <code>react-carbon-footprint</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span>Department of CSE, Ahsanullah University of Science and Technology</span>
+        <span>Page 6</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>

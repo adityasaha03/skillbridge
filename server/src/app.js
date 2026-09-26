@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const carbonFootprintMiddleware = require('./middleware/carbonFootprintMiddleware');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
+app.use(carbonFootprintMiddleware);
 
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
