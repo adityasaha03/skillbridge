@@ -6,7 +6,11 @@
  * - Cross-origin resilient CSRF token caching (fallback for browsers blocking cross-domain document.cookie access)
  */
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
+    ? import.meta.env.VITE_API_URL
+    : 'https://skillbridge-h8n3.onrender.com'
+).replace(/\/$/, '');
 
 /**
  * Resolves an API endpoint to an absolute or proxy URL based on environment.
