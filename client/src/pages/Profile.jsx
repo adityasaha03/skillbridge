@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchUserProfile, updateUserProfile, updateUserSkills } from "../services/userService";
 import { fetchNotifications } from "../services/notificationService";
 import { useAuth } from "../context/AuthContext";
+import Navbar from "../components/Navbar";
+import BottomNav from "../components/BottomNav";
+import TagBadge from "../components/TagBadge";
 
 const initialProfile = {
   name: "Student",
   role: "Undergraduate Student",
   department: "CSE",
+  semester: "2.2",
   institution: "Ahsanullah University of Science and Technology",
   avatar: "S",
   email: "",
@@ -19,7 +23,7 @@ const initialProfile = {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user: authUser } = useAuth();
   const [profile, setProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(initialProfile);
@@ -32,18 +36,20 @@ const Profile = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadProfile = async () => {
       try {
         const user = await fetchUserProfile();
-        if (user) {
+        if (user && isMounted) {
           const mapped = {
-            name: user.fullName || "Student",
+            name: user.fullName || authUser?.fullName || "Student",
             role: user.roles?.includes("tutor") ? "Tutor / Student" : "Undergraduate Student",
             department: user.department || "CSE",
             semester: user.semester || "2.2",
             institution: user.institution || "Ahsanullah University of Science and Technology",
             avatar: user.avatar || user.fullName?.charAt(0).toUpperCase() || "S",
-            email: user.email || "",
+            email: user.email || authUser?.email || "",
             phone: user.phone || "",
             bio: user.contextBio || "",
             skillsToTeach: (user.strongTags || []).map((t) => t.name || t),
@@ -56,19 +62,25 @@ const Profile = () => {
         console.error("Failed to load user profile:", err);
         navigate("/login");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
 
       try {
         const notifs = await fetchNotifications();
-        setUnreadCount(notifs.unreadCount || 0);
+        if (isMounted) {
+          setUnreadCount(notifs.unreadCount || 0);
+        }
       } catch (e) {
         console.warn("Failed to fetch notification count", e);
       }
     };
 
     loadProfile();
-  }, [navigate]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate, authUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -100,7 +112,7 @@ const Profile = () => {
 
       setProfile(formData);
       setIsEditing(false);
-      setStatusMessage("Profile updated successfully!");
+      setStatusMessage("Profile and complementary skills updated successfully!");
     } catch (err) {
       setErrorMessage(err.message || "Failed to save profile changes.");
     } finally {
@@ -116,18 +128,20 @@ const Profile = () => {
 
   const addSkill = (type) => {
     if (type === "teach" && newTeachSkill.trim()) {
-      if (!formData.skillsToTeach.includes(newTeachSkill.trim())) {
+      const clean = newTeachSkill.trim();
+      if (!formData.skillsToTeach.includes(clean)) {
         setFormData((prev) => ({
           ...prev,
-          skillsToTeach: [...prev.skillsToTeach, newTeachSkill.trim()],
+          skillsToTeach: [...prev.skillsToTeach, clean],
         }));
       }
       setNewTeachSkill("");
     } else if (type === "learn" && newLearnSkill.trim()) {
-      if (!formData.skillsToLearn.includes(newLearnSkill.trim())) {
+      const clean = newLearnSkill.trim();
+      if (!formData.skillsToLearn.includes(clean)) {
         setFormData((prev) => ({
           ...prev,
-          skillsToLearn: [...prev.skillsToLearn, newLearnSkill.trim()],
+          skillsToLearn: [...prev.skillsToLearn, clean],
         }));
       }
       setNewLearnSkill("");
@@ -148,242 +162,205 @@ const Profile = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } finally {
-      navigate("/login");
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
-        Loading profile...
+        <div className="text-center">
+          <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-3 border-indigo-600 border-t-transparent" />
+          <p className="text-sm font-medium">Loading profile...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      {/* =====================================
-          NAVBAR
-      ====================================== */}
-      <header className="sticky top-0 z-50 border-b border-slate-300 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo */}
-          <Link
-            to="/dashboard"
-            className="text-2xl font-bold tracking-tight text-slate-950"
-          >
-            Skill<span className="text-indigo-600">Bridge</span>
-          </Link>
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 md:pb-12">
+      {/* Responsive Navbar */}
+      <Navbar unreadCount={unreadCount} />
 
-          {/* Navigation */}
-          <nav className="flex items-center gap-4 md:gap-8">
-            <Link
-              to="/dashboard"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              Topics
-            </Link>
-
-            <Link
-              to="/history"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              History
-            </Link>
-
-            <Link
-              to="/chat"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              Chat
-            </Link>
-
-            <Link
-              to="/profile"
-              className="text-sm font-semibold text-indigo-600"
-            >
-              Profile
-            </Link>
-          </nav>
-
-          {/* Right-side controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Notification Bell */}
-            <Link
-              to="/notifications"
-              aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg border-2 border-indigo-600 bg-white text-indigo-600 shadow-sm transition hover:bg-indigo-50 active:scale-95"
-            >
-              <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a6 6 0 0 1 12 0c0 3.5 1 5 1.5 6H4.5C5 13 6 11.5 6 8Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 17a2.5 2.5 0 0 0 5 0" />
-              </svg>
-              {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="cursor-pointer whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
-            >
-              Log Out
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* =====================================
-          PROFILE MAIN SHELL
-      ====================================== */}
-      <main className="mx-auto flex w-full max-w-7xl flex-1 gap-0 overflow-hidden px-0 py-0 sm:px-6 sm:py-6">
-        <div className="flex w-full flex-col overflow-hidden rounded-none border-0 border-slate-300 bg-white shadow-none sm:rounded-2xl sm:border sm:shadow-sm">
-          
-          {/* Card Header */}
-          <div className="flex items-center justify-between border-b border-slate-300 px-6 py-5">
+      {/* Main Profile Shell */}
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+        <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 p-5 sm:p-6 bg-slate-50/50">
             <div>
-              <h1 className="text-xl font-bold text-slate-950">User Profile</h1>
-              <p className="text-xs text-slate-500">Manage your university information, bio, and complementary skills.</p>
+              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950">
+                Academic Profile
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium">
+                Manage your student identity, bio, and reciprocal knowledge trade inventory.
+              </p>
             </div>
+
             {!isEditing && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
-                className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 sm:text-sm"
+                className="self-start sm:self-auto cursor-pointer rounded-xl bg-indigo-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-indigo-700 active:scale-95 transition"
               >
                 Edit Profile
               </button>
             )}
           </div>
 
+          {/* Alert Messages */}
           {statusMessage && (
-            <div className="mx-6 mt-4 rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-sm text-emerald-800">
-              {statusMessage}
+            <div className="mx-5 sm:mx-6 mt-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs sm:text-sm font-medium text-emerald-800 animate-fade-in shadow-2xs">
+              <span>{statusMessage}</span>
+              <button type="button" onClick={() => setStatusMessage("")} className="font-bold text-emerald-900 ml-2">
+                ×
+              </button>
             </div>
           )}
 
           {errorMessage && (
-            <div className="mx-6 mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">
-              {errorMessage}
+            <div className="mx-5 sm:mx-6 mt-4 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs sm:text-sm font-medium text-rose-800 animate-fade-in shadow-2xs">
+              <span>{errorMessage}</span>
+              <button type="button" onClick={() => setErrorMessage("")} className="font-bold text-rose-900 ml-2">
+                ×
+              </button>
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-6 md:p-8">
+          {/* Body */}
+          <div className="p-5 sm:p-8">
             {isEditing ? (
-              /* EDIT FORM */
-              <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              /* =====================================
+                 EDIT MODE FORM
+              ====================================== */
+              <form onSubmit={handleSave} className="space-y-6">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Full Name</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Full Name
+                    </label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      required
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Role / Designation</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Role / Designation
+                    </label>
                     <input
                       type="text"
                       name="role"
                       disabled
                       value={formData.role}
-                      className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 outline-none"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-xs sm:text-sm text-slate-500 outline-none cursor-not-allowed"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Department</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Department
+                    </label>
                     <input
                       type="text"
                       name="department"
                       value={formData.department}
                       onChange={handleInputChange}
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      placeholder="e.g. Department of CSE"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Semester</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Semester
+                    </label>
                     <input
                       type="text"
                       name="semester"
                       value={formData.semester || ""}
                       onChange={handleInputChange}
                       placeholder="e.g. 2.2, 3.1"
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Institution</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Institution
+                    </label>
                     <input
                       type="text"
                       name="institution"
                       value={formData.institution}
                       onChange={handleInputChange}
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Phone</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Phone Number (Optional)
+                    </label>
                     <input
                       type="text"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="+880 1..."
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
                 </div>
 
+                {/* Bio */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Bio & Study Context</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Bio & Learning Objectives
+                  </label>
                   <textarea
                     name="bio"
                     rows={3}
                     value={formData.bio}
                     onChange={handleInputChange}
-                    placeholder="Describe what you excel at and what topics you need help with..."
-                    className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-4 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    placeholder="Describe what courses you excel in and what academic areas you want to improve..."
+                    className="w-full rounded-xl border border-slate-300 bg-white p-3.5 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                   />
                 </div>
 
                 {/* Edit Skills to Teach */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Can Teach (Strong Tags)</label>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-indigo-900">
+                    Skills Can Teach (Strengths)
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 min-h-[32px]">
                     {formData.skillsToTeach.map((skill, index) => (
-                      <span key={index} className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
-                        {skill}
-                        <button type="button" onClick={() => removeSkill("teach", index)} className="hover:text-indigo-900">×</button>
-                      </span>
+                      <TagBadge
+                        key={index}
+                        tag={skill}
+                        type="teach"
+                        onRemove={() => removeSkill("teach", index)}
+                      />
                     ))}
                   </div>
-                  <div className="mt-2 flex gap-2">
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       value={newTeachSkill}
                       onChange={(e) => setNewTeachSkill(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addSkill("teach");
+                        }
+                      }}
                       placeholder="Add a skill you can teach..."
-                      className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs text-slate-900 outline-none focus:border-indigo-500"
+                      className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                     <button
                       type="button"
                       onClick={() => addSkill("teach")}
-                      className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                      className="cursor-pointer rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition"
                     >
                       Add
                     </button>
@@ -391,115 +368,155 @@ const Profile = () => {
                 </div>
 
                 {/* Edit Skills to Learn */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">Skills Want to Learn (Weak Tags)</label>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-teal-900">
+                    Skills Want to Learn (Target Subjects)
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 min-h-[32px]">
                     {formData.skillsToLearn.map((skill, index) => (
-                      <span key={index} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                        {skill}
-                        <button type="button" onClick={() => removeSkill("learn", index)} className="hover:text-slate-900">×</button>
-                      </span>
+                      <TagBadge
+                        key={index}
+                        tag={skill}
+                        type="learn"
+                        onRemove={() => removeSkill("learn", index)}
+                      />
                     ))}
                   </div>
-                  <div className="mt-2 flex gap-2">
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       value={newLearnSkill}
                       onChange={(e) => setNewLearnSkill(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addSkill("learn");
+                        }
+                      }}
                       placeholder="Add a skill you want to learn..."
-                      className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs text-slate-900 outline-none focus:border-indigo-500"
+                      className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-slate-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
                     />
                     <button
                       type="button"
                       onClick={() => addSkill("learn")}
-                      className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                      className="cursor-pointer rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-700 transition"
                     >
                       Add
                     </button>
                   </div>
                 </div>
 
-                {/* Controls */}
-                <div className="flex items-center gap-3 pt-4">
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 sm:text-sm disabled:opacity-60"
+                    className="cursor-pointer rounded-xl bg-indigo-600 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-indigo-700 active:scale-95 transition disabled:opacity-60"
                   >
-                    {saving ? "Saving..." : "Save Changes"}
+                    {saving ? "Saving Changes..." : "Save Changes"}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 sm:text-sm"
+                    className="cursor-pointer rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-400 active:scale-95 transition"
                   >
                     Cancel
                   </button>
                 </div>
               </form>
             ) : (
-              /* VIEW MODE */
-              <div className="space-y-8 max-w-4xl">
-                {/* Header Profile Info */}
-                <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-indigo-200 bg-indigo-50 text-3xl font-bold text-indigo-600">
+              /* =====================================
+                 VIEW MODE
+              ====================================== */
+              <div className="space-y-8">
+                {/* Profile Identity Bar */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5 pb-6 border-b border-slate-200">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-3xl font-extrabold text-indigo-700 border-2 border-indigo-200 shadow-sm">
                     {profile.avatar}
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-slate-950">{profile.name}</h2>
-                    <p className="text-sm font-semibold text-indigo-600">{profile.role} · {profile.department} (Semester {profile.semester || "2.2"})</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{profile.institution}</p>
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-bold text-slate-950">
+                      {profile.name}
+                    </h2>
+                    <p className="text-sm font-semibold text-indigo-700">
+                      {profile.role} · {profile.department} (Semester {profile.semester})
+                    </p>
+                    <p className="text-xs text-slate-500 font-medium">
+                      {profile.institution}
+                    </p>
                   </div>
                 </div>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 gap-6 border-y border-slate-300 py-6 sm:grid-cols-2">
+                {/* Contact Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-4 border-b border-slate-200">
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Email Address</span>
-                    <p className="mt-1 text-sm font-semibold text-slate-800">{profile.email}</p>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      AUST Email Address
+                    </span>
+                    <p className="mt-1 text-sm font-semibold text-slate-900 break-all">
+                      {profile.email || "student@aust.edu"}
+                    </p>
                   </div>
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Phone Number</span>
-                    <p className="mt-1 text-sm font-semibold text-slate-800">{profile.phone || "Not specified"}</p>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Phone Number
+                    </span>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                      {profile.phone || "Not specified"}
+                    </p>
                   </div>
                 </div>
 
-                {/* Bio Section */}
+                {/* About & Bio */}
                 <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">About Me</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">
-                    {profile.bio || "No bio specified yet. Click 'Edit Profile' to share what you're working on!"}
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                    About & Academic Focus
+                  </h3>
+                  <p className="text-sm text-slate-700 leading-relaxed bg-slate-50/70 p-4 rounded-xl border border-slate-200/80">
+                    {profile.bio || "No study bio added yet. Click 'Edit Profile' to introduce what subjects you enjoy and what you want to master!"}
                   </p>
                 </div>
 
-                {/* Skills Sections */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-300 bg-slate-50/60 p-5">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Skills Can Teach</h3>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                {/* Skills Cards Grid */}
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {/* Skills to Teach */}
+                  <div className="rounded-2xl border border-indigo-200/80 bg-indigo-50/40 p-5 space-y-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-white text-[10px] font-bold">
+                        ↑
+                      </span>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-900">
+                        Skills I Can Teach (Strengths)
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
                       {profile.skillsToTeach && profile.skillsToTeach.length > 0 ? (
-                        profile.skillsToTeach.map((skill, index) => (
-                          <span key={index} className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
-                            {skill}
-                          </span>
+                        profile.skillsToTeach.map((skill, idx) => (
+                          <TagBadge key={idx} tag={skill} type="teach" />
                         ))
                       ) : (
-                        <span className="text-xs text-slate-400">No skills added yet</span>
+                        <span className="text-xs text-slate-400 italic">No teaching skills listed yet</span>
                       )}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-300 bg-slate-50/60 p-5">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Skills Want to Learn</h3>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                  {/* Skills to Learn */}
+                  <div className="rounded-2xl border border-teal-200/80 bg-teal-50/40 p-5 space-y-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-white text-[10px] font-bold">
+                        ↓
+                      </span>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-teal-900">
+                        Skills I Want to Learn (Needs)
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
                       {profile.skillsToLearn && profile.skillsToLearn.length > 0 ? (
-                        profile.skillsToLearn.map((skill, index) => (
-                          <span key={index} className="rounded-full border border-slate-300 bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
-                            {skill}
-                          </span>
+                        profile.skillsToLearn.map((skill, idx) => (
+                          <TagBadge key={idx} tag={skill} type="learn" />
                         ))
                       ) : (
-                        <span className="text-xs text-slate-400">No skills added yet</span>
+                        <span className="text-xs text-slate-400 italic">No learning goals listed yet</span>
                       )}
                     </div>
                   </div>
@@ -509,6 +526,9 @@ const Profile = () => {
           </div>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav unreadCount={unreadCount} />
     </div>
   );
 };

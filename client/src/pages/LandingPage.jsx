@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,28 +5,38 @@ const LandingPage = () => {
   const { user, loading, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="text-2xl font-bold tracking-tight text-slate-950">
-            Skill<span className="text-indigo-600">Bridge</span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+      {/* =====================================
+          HEADER
+      ====================================== */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-4">
+          <Link to="/" className="flex items-center gap-2 group text-xl sm:text-2xl font-extrabold tracking-tight text-slate-950">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-base shadow-sm group-hover:bg-indigo-700 transition-colors">
+              SB
+            </span>
+            <span>
+              Skill<span className="text-indigo-600">Bridge</span>
+            </span>
           </Link>
-          <nav className="flex items-center gap-4">
+
+          {/* Desktop Auth Controls */}
+          <nav className="hidden sm:flex items-center gap-3">
             {!loading && user ? (
               <>
-                <span className="hidden sm:inline text-sm font-medium text-slate-600">
-                  Welcome, <strong className="text-slate-900">{user.fullName}</strong>
+                <span className="text-xs font-semibold text-slate-600">
+                  Welcome, <strong className="text-slate-900">{user.fullName?.split(' ')[0]}</strong>
                 </span>
                 <Link
                   to="/dashboard"
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition duration-150"
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-indigo-700 active:scale-95 transition"
                 >
-                  Dashboard →
+                  Go to Dashboard →
                 </Link>
                 <button
+                  type="button"
                   onClick={logout}
-                  className="px-3 py-2 text-sm font-semibold text-slate-600 hover:text-red-600 transition duration-150"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"
                 >
                   Log Out
                 </button>
@@ -36,102 +45,167 @@ const LandingPage = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-indigo-600 transition duration-150"
+                  className="px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition duration-150"
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-indigo-700 active:scale-95 transition"
                 >
-                  Sign Up
+                  Sign Up Free
                 </Link>
               </>
             )}
           </nav>
-        </div>
-      </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-        <div className="flex flex-col items-center text-center rounded-2xl border border-slate-200/80 bg-white p-8 md:p-14 shadow-sm">
-          <span className="mb-4 rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-semibold text-indigo-700 border border-indigo-100">
-            Peer-to-Peer Knowledge Sharing
-          </span>
-          <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-950 md:text-5xl">
-            Bridge Your Knowledge Gap
-          </h1>
-          <p className="max-w-2xl text-base md:text-lg leading-7 text-slate-600 mb-8">
-            Connect with university peers for reciprocal academic growth. Trade your strengths, master new subjects, and build your skill inventory.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+          {/* Mobile Menu Button */}
+          <div className="flex sm:hidden items-center gap-2">
             {!loading && user ? (
               <Link
                 to="/dashboard"
-                className="rounded-lg bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow hover:bg-indigo-700 active:scale-95 transition duration-150 text-center"
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs"
               >
-                Go to Your Dashboard →
+                Dashboard →
               </Link>
             ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-700 active:scale-95 transition duration-150 text-center"
-                >
-                  Get Started
-                </Link>
-                <Link
-                  to="/register"
-                  className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-400 active:scale-95 transition duration-150 text-center"
-                >
-                  Create Account
-                </Link>
-              </>
+              <Link
+                to="/login"
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs"
+              >
+                Log In
+              </Link>
             )}
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Features Grid */}
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 font-bold">
-              ⇄
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">
-              Reciprocal Matching
-            </h3>
-            <p className="text-sm leading-6 text-slate-600">
-              Equal mutual knowledge exchange guaranteed by our smart pairing system.
+      {/* =====================================
+          HERO SECTION
+      ====================================== */}
+      <main className="flex-1">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 lg:py-24">
+          <div className="flex flex-col items-center text-center rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-12 lg:p-16 shadow-xs relative overflow-hidden">
+            {/* Background gradient blur */}
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-indigo-100/60 rounded-full blur-3xl pointer-events-none" />
+
+            <span className="relative mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5 text-xs font-bold text-indigo-700 border border-indigo-100 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
+              Reciprocal University Academic Exchange
+            </span>
+
+            <h1 className="relative mb-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 max-w-3xl leading-[1.15]">
+              Exchange Knowledge with Campus Peers.
+            </h1>
+
+            <p className="relative max-w-2xl text-sm sm:text-base lg:text-lg leading-relaxed text-slate-600 mb-8">
+              Connect with fellow students for reciprocal academic growth. Trade your academic strengths, learn tough subjects from classmates, and build a lasting skill inventory.
             </p>
+
+            <div className="relative flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
+              {!loading && user ? (
+                <Link
+                  to="/dashboard"
+                  className="rounded-xl bg-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition text-center"
+                >
+                  Enter Your Dashboard →
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className="rounded-xl bg-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition text-center"
+                  >
+                    Get Started Free
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="rounded-xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 shadow-2xs hover:bg-slate-50 hover:border-slate-400 active:scale-95 transition text-center"
+                  >
+                    Log In with AUST Email
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Quick Demo Preview Stats */}
+            <div className="relative mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-3xl pt-8 border-t border-slate-100">
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-indigo-600">100%</p>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Reciprocal Trade</p>
+              </div>
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-slate-900">2-Way</p>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Cycle-2 Matching</p>
+              </div>
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-slate-900">Standard</p>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Course Taxonomies</p>
+              </div>
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-teal-600">Zero Cost</p>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Free Peer Mentoring</p>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 font-bold">
-              #
+        {/* =====================================
+            FEATURES GRID
+        ====================================== */}
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-16 sm:pb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs transition-all hover:border-indigo-300 hover:shadow-md">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xl border border-indigo-100">
+                ⇄
+              </div>
+              <h3 className="text-lg font-bold text-slate-950 mb-2">
+                Reciprocal Matching Engine
+              </h3>
+              <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
+                Guaranteed mutual learning balance. You only match with peers who want what you can teach and offer what you need to learn.
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">
-              Taxonomy Tags
-            </h3>
-            <p className="text-sm leading-6 text-slate-600">
-              Standardized course & topic tags to easily target exact academic needs.
-            </p>
+
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs transition-all hover:border-indigo-300 hover:shadow-md">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-700 font-bold text-xl border border-teal-100">
+                #
+              </div>
+              <h3 className="text-lg font-bold text-slate-950 mb-2">
+                Standardized Topics
+              </h3>
+              <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
+                Curated academic course tags across Data Structures, Algorithms, Systems, AI, and Software Engineering for precision pairing.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-2xs transition-all hover:border-indigo-300 hover:shadow-md">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xl border border-indigo-100">
+                ✓
+              </div>
+              <h3 className="text-lg font-bold text-slate-950 mb-2">
+                Seamless Study Chat
+              </h3>
+              <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
+                In-app messaging to coordinate study sessions, share study resources, and track past exchange sessions seamlessly.
+              </p>
+            </div>
           </div>
+        </section>
+      </main>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 font-bold">
-              ✓
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">
-              Bridge Workflow
-            </h3>
-            <p className="text-sm leading-6 text-slate-600">
-              Streamlined session scheduling and peer acceptance workflows.
-            </p>
+      {/* =====================================
+          FOOTER
+      ====================================== */}
+      <footer className="border-t border-slate-200 bg-white py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+          <p>© 2026 SkillBridge · Peer Knowledge Sharing for Academic Excellence.</p>
+          <div className="flex gap-4 font-medium text-slate-600">
+            <Link to="/login" className="hover:text-indigo-600">Log In</Link>
+            <Link to="/register" className="hover:text-indigo-600">Sign Up</Link>
           </div>
         </div>
-      </section>
+      </footer>
     </div>
   );
 };

@@ -1,55 +1,63 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchTags } from "../services/tagService";
 import { fetchUserProfile, updateUserSkills } from "../services/userService";
 import { fetchReciprocalMatches, sendMatchRequest } from "../services/matchService";
 import { fetchNotifications } from "../services/notificationService";
 import { useAuth } from "../context/AuthContext";
+import Navbar from "../components/Navbar";
+import BottomNav from "../components/BottomNav";
+import TagBadge from "../components/TagBadge";
 
 /* ---------------------------------------
-   FALLBACK TOPICS TAXONOMY
+   STANDARDIZED TOPICS TAXONOMY
 ---------------------------------------- */
 const defaultTopics = [
-  "C Programming",
-  "C++",
-  "C++ Graph Algorithms",
   "Data Structures",
   "Algorithms",
-  "Java",
-  "Python",
-  "Python for Machine Learning",
   "React",
-  "React UI",
-  "React Hooks",
-  "JavaScript",
-  "HTML",
-  "CSS",
-  "Database Design",
-  "SQL",
-  "MongoDB",
+  "Python",
+  "C++",
+  "Java",
   "Node.js",
-  "Express.js",
   "Machine Learning",
-  "Artificial Intelligence",
-  "Computer Architecture",
+  "Database Design",
   "Operating Systems",
   "Computer Networks",
-  "CAE",
+  "C Programming",
+  "SQL",
+  "Artificial Intelligence",
   "Flutter",
+  "JavaScript",
+  "HTML & CSS",
+  "Computer Architecture",
   "System Architecture",
 ];
 
+const popularSuggestions = [
+  "Algorithms",
+  "Data Structures",
+  "React",
+  "Python",
+  "C++",
+  "Database Design",
+  "Operating Systems",
+];
+
 /* ---------------------------------------
-   REUSABLE TOPIC SELECTOR
+   REUSABLE RESPONSIVE TOPIC SELECTOR
 ---------------------------------------- */
 const TopicSelector = ({
   label,
+  type = "neutral", // "learn" | "teach"
   placeholder,
   selectedTopics,
   setSelectedTopics,
   availableTopics = [],
 }) => {
   const [input, setInput] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const containerRef = useRef(null);
 
   const filteredTopics = availableTopics.filter(
     (topic) =>
@@ -58,16 +66,16 @@ const TopicSelector = ({
   );
 
   const addTopic = (topic) => {
-    if (!selectedTopics.includes(topic)) {
-      setSelectedTopics([...selectedTopics, topic]);
+    const cleanTopic = topic.trim();
+    if (cleanTopic && !selectedTopics.includes(cleanTopic)) {
+      setSelectedTopics([...selectedTopics, cleanTopic]);
     }
     setInput("");
+    setIsDropdownOpen(false);
   };
 
   const removeTopic = (topic) => {
-    setSelectedTopics(
-      selectedTopics.filter((selectedTopic) => selectedTopic !== topic)
-    );
+    setSelectedTopics(selectedTopics.filter((t) => t !== topic));
   };
 
   const handleKeyDown = (e) => {
@@ -78,78 +86,127 @@ const TopicSelector = ({
       } else if (input.trim()) {
         addTopic(input.trim());
       }
+    } else if (e.key === "Escape") {
+      setIsDropdownOpen(false);
     }
   };
 
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-800">
-        {label}
-      </label>
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-      {/* Selected Topics */}
-      {selectedTopics.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="flex items-center justify-between mb-2">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
+          {label}
+        </label>
+        {selectedTopics.length > 0 && (
+          <span className="text-[11px] font-semibold text-slate-500">
+            {selectedTopics.length} selected
+          </span>
+        )}
+      </div>
+
+      {/* Selected Topics Badges */}
+      {selectedTopics.length > 0 ? (
+        <div className="mb-3 flex flex-wrap gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
           {selectedTopics.map((topic) => (
-            <span
+            <TagBadge
               key={topic}
-              className="flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700"
-            >
-              {topic}
-              <button
-                type="button"
-                onClick={() => removeTopic(topic)}
-                className="font-bold text-indigo-400 transition hover:text-indigo-700"
-                aria-label={`Remove ${topic}`}
-              >
-                ×
-              </button>
-            </span>
+              tag={topic}
+              type={type}
+              onRemove={() => removeTopic(topic)}
+            />
           ))}
+        </div>
+      ) : (
+        <div className="mb-2.5 text-xs text-slate-400 italic">
+          No topics selected yet. Pick from popular or type below.
         </div>
       )}
 
-      {/* Search Input */}
+      {/* Search / Input Field */}
       <div className="relative">
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onFocus={() => setIsDropdownOpen(true)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            setIsDropdownOpen(true);
+          }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
         />
 
-        {/* Suggestions */}
-        {input && filteredTopics.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-52 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
-            {filteredTopics.slice(0, 6).map((topic) => (
+        {input && (
+          <button
+            type="button"
+            onClick={() => addTopic(input)}
+            className="absolute right-2 top-2 px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+          >
+            Add
+          </button>
+        )}
+
+        {/* Suggestions Dropdown */}
+        {isDropdownOpen && input && filteredTopics.length > 0 && (
+          <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl animate-fade-in">
+            {filteredTopics.slice(0, 8).map((topic) => (
               <button
                 key={topic}
                 type="button"
                 onClick={() => addTopic(topic)}
-                className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700"
+                className="w-full text-left px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center justify-between"
               >
-                {topic}
+                <span>{topic}</span>
+                <span className="text-[11px] text-indigo-500 font-semibold">+ Add</span>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <p className="mt-2 text-xs text-slate-500">
-        Search and select from standardized SkillBridge topics, or press Enter to add custom.
-      </p>
+      {/* Quick Add Chips */}
+      <div className="mt-2.5">
+        <span className="text-[11px] font-medium text-slate-500 block mb-1">
+          Quick suggestions:
+        </span>
+        <div className="flex flex-wrap gap-1">
+          {popularSuggestions
+            .filter((s) => !selectedTopics.includes(s))
+            .slice(0, 5)
+            .map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => addTopic(s)}
+                className="text-[11px] font-medium px-2 py-0.5 rounded-md border border-slate-200 bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors cursor-pointer"
+              >
+                + {s}
+              </button>
+            ))}
+        </div>
+      </div>
     </div>
   );
 };
 
 /* ---------------------------------------
-   DASHBOARD
+   DASHBOARD COMPONENT
 ---------------------------------------- */
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user: authUser } = useAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [allTopics, setAllTopics] = useState(defaultTopics);
 
@@ -158,21 +215,37 @@ const Dashboard = () => {
 
   const [matches, setMatches] = useState([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
+  const [connectingUserId, setConnectingUserId] = useState(null);
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const formSectionRef = useRef(null);
+
+  const loadMatches = useCallback(async () => {
+    setLoadingMatches(true);
+    try {
+      const matchSuggestions = await fetchReciprocalMatches();
+      setMatches(matchSuggestions || []);
+    } catch (err) {
+      console.error("Failed to load reciprocal matches:", err);
+    } finally {
+      setLoadingMatches(false);
+    }
+  }, []);
 
   // Load initial data
   useEffect(() => {
+    let isMounted = true;
+
     const loadDashboardData = async () => {
       try {
         // Fetch topics
         try {
           const tags = await fetchTags();
-          if (tags && tags.length > 0) {
+          if (tags && tags.length > 0 && isMounted) {
             setAllTopics(tags.map((t) => t.name));
           }
         } catch (e) {
@@ -182,7 +255,7 @@ const Dashboard = () => {
         // Fetch User Profile
         try {
           const user = await fetchUserProfile();
-          if (user) {
+          if (user && isMounted) {
             setCurrentUser(user);
             if (user.weakTags && user.weakTags.length > 0) {
               setWantToLearn(user.weakTags.map((t) => t.name || t));
@@ -192,18 +265,21 @@ const Dashboard = () => {
             }
           }
         } catch {
-          // If not logged in, redirect to login
           navigate("/login");
           return;
         }
 
         // Fetch matches
-        loadMatches();
+        if (isMounted) {
+          await loadMatches();
+        }
 
         // Fetch unread notifications count
         try {
           const notifs = await fetchNotifications();
-          setUnreadCount(notifs.unreadCount || 0);
+          if (isMounted) {
+            setUnreadCount(notifs.unreadCount || 0);
+          }
         } catch (e) {
           console.warn("Failed to fetch notification count", e);
         }
@@ -213,22 +289,14 @@ const Dashboard = () => {
     };
 
     loadDashboardData();
-  }, [navigate]);
 
-  const loadMatches = async () => {
-    setLoadingMatches(true);
-    try {
-      const matchSuggestions = await fetchReciprocalMatches();
-      setMatches(matchSuggestions);
-    } catch (err) {
-      console.error("Failed to load reciprocal matches:", err);
-    } finally {
-      setLoadingMatches(false);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate, loadMatches]);
 
   /* ---------------------------------------
-     POST / UPDATE SKILLS REQUEST
+     UPDATE SKILLS & RECALCULATE MATCHES
   ---------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -248,262 +316,291 @@ const Dashboard = () => {
     setSubmitting(true);
     try {
       await updateUserSkills({ wantToLearn, canTeach });
-      setMessage("Your academic exchange request has been updated. Reciprocal matches refreshed!");
+      setMessage("Your skills request is active! Reciprocal campus matches have been updated.");
       await loadMatches();
     } catch (err) {
-      setError(err.message || "Failed to update skills.");
+      setError(err.message || "Failed to update skills. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   /* ---------------------------------------
-     CONNECT
+     CONNECT WITH PEER
   ---------------------------------------- */
-  const handleConnect = async (userId) => {
+  const handleConnect = async (peerId) => {
+    setError("");
+    setConnectingUserId(peerId);
+
     try {
-      await sendMatchRequest(userId);
-      setConnectedUsers((prev) => [...prev, userId]);
+      await sendMatchRequest(peerId);
+      setConnectedUsers((prev) => [...prev, peerId]);
+      
+      // Update local match state immediately
+      setMatches((prev) =>
+        prev.map((m) =>
+          m.id === peerId ? { ...m, connectionStatus: "pending" } : m
+        )
+      );
+
+      setMessage("Bridge connection invite sent successfully!");
     } catch (err) {
       setError(err.message || "Failed to send connection request.");
-    }
-  };
-
-  /* ---------------------------------------
-     LOGOUT
-  ---------------------------------------- */
-  const handleLogout = async () => {
-    try {
-      await logout();
     } finally {
-      navigate("/login");
+      setConnectingUserId(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 md:pb-10">
+      {/* Responsive Navbar */}
+      <Navbar unreadCount={unreadCount} />
+
       {/* =====================================
-          NAVBAR
+          HERO BANNER
       ====================================== */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo */}
-          <Link
-            to="/dashboard"
-            className="text-2xl font-bold tracking-tight text-slate-950"
-          >
-            Skill<span className="text-indigo-600">Bridge</span>
-          </Link>
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-6 sm:pt-8">
+        <div className="flex flex-col items-center rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-10 text-center shadow-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-bold text-indigo-800">
+            <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
+            AUST Reciprocal Peer Knowledge Sharing
+          </span>
 
-          {/* Navigation */}
-          <nav className="flex items-center gap-4 md:gap-8">
-            <Link
-              to="/dashboard"
-              className="text-sm font-semibold text-indigo-600"
-            >
-              Topics
-            </Link>
+          <h1 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-950">
+            Welcome back, {currentUser?.fullName || authUser?.fullName || "Student"}!
+          </h1>
 
-            <Link
-              to="/history"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              History
-            </Link>
+          <p className="mt-2 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-slate-600">
+            Find peers who can teach what you need while you help them master topics you excel at. Balanced knowledge trade without fees.
+          </p>
 
-            <Link
-              to="/chat"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              Chat
-            </Link>
-
-            <Link
-              to="/profile"
-              className="text-sm font-semibold text-slate-600 transition hover:text-indigo-600"
-            >
-              Profile
-            </Link>
-          </nav>
-
-          {/* Right-side controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Notification Bell */}
-            <Link
-              to="/notifications"
-              aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-600 bg-white text-indigo-600 shadow-sm transition hover:bg-indigo-50 active:scale-95"
-            >
-              <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a6 6 0 0 1 12 0c0 3.5 1 5 1.5 6H4.5C5 13 6 11.5 6 8Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 17a2.5 2.5 0 0 0 5 0" />
-              </svg>
-              {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Logout */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <button
-              onClick={handleLogout}
-              className="cursor-pointer whitespace-nowrap rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
+              type="button"
+              onClick={() => {
+                formSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
             >
-              Log Out
+              Update your learning goals ↓
             </button>
           </div>
         </div>
-      </header>
-
-      {/* =====================================
-          WELCOME
-      ====================================== */}
-      <section className="mx-auto max-w-7xl px-6 pt-10">
-        <div className="flex flex-col items-center rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-sm md:p-12">
-          <span className="mb-4 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-1.5 text-sm font-semibold text-indigo-700">
-            Peer-to-Peer Academic Learning · AUST
-          </span>
-
-          <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">
-            Welcome back, {currentUser?.fullName || "Student"}!
-          </h1>
-
-          <p className="max-w-2xl text-base leading-7 text-slate-600">
-            Discover peers who can teach what you want to learn while
-            learning something valuable from you in return.
-          </p>
-        </div>
       </section>
 
+      {/* System alert messages */}
+      {(message || error) && (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-4">
+          {message && (
+            <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs sm:text-sm font-medium text-emerald-800 animate-fade-in shadow-2xs">
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 shrink-0 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                </svg>
+                <span>{message}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMessage("")}
+                className="text-emerald-700 hover:text-emerald-950 font-bold ml-2 text-base"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs sm:text-sm font-medium text-rose-800 animate-fade-in shadow-2xs">
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 shrink-0 text-rose-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                <span>{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError("")}
+                className="text-rose-700 hover:text-rose-950 font-bold ml-2 text-base"
+              >
+                ×
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* =====================================
-          MAIN CONTENT
+          MAIN CONTENT (2 COLUMNS ON DESKTOP, RESPONSIVE STACK ON MOBILE/PAD)
       ====================================== */}
-      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-10 lg:grid-cols-[1.15fr_0.85fr]">
+      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 py-6 lg:grid-cols-[1.15fr_0.85fr]">
         {/* =====================================
-            MATCHES
+            LEFT: RECIPROCAL MATCHES
         ====================================== */}
-        <section>
-          <div className="mb-5">
-            <span className="text-sm font-semibold text-indigo-600">
-              Reciprocal Matching Engine
+        <section className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+                Matching Algorithm
+              </span>
+              <h2 className="mt-0.5 text-xl sm:text-2xl font-extrabold text-slate-950">
+                Available Skill Matches
+              </h2>
+            </div>
+            <span className="text-xs text-slate-500 font-medium">
+              {matches.length} peer{matches.length === 1 ? "" : "s"} with mutual exchange
             </span>
-
-            <h2 className="mt-1 text-2xl font-bold text-slate-950">
-              Available Skill Matches
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              These students offer skills you want while also desiring skills you can teach (Cycle of 2).
-            </p>
           </div>
 
           {loadingMatches ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-              Calculating reciprocal matches across campus...
+            <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-2xs">
+              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-3 border-indigo-600 border-t-transparent" />
+              <p className="text-sm font-medium">Finding reciprocal peers across your university...</p>
             </div>
           ) : matches.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-xl font-bold">
+            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 sm:p-12 text-center shadow-2xs">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 text-2xl font-bold">
                 ⇄
               </div>
-              <h3 className="text-base font-semibold text-slate-800">No reciprocal matches found yet</h3>
-              <p className="mt-1 text-sm text-slate-500 max-w-md mx-auto">
-                Post or update your skills on the right. As soon as a peer's strengths match what you want to learn and vice versa, their profile will appear here!
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                No reciprocal matches found yet
+              </h3>
+              <p className="mt-1.5 max-w-md mx-auto text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Add more subjects you want to learn or can teach in the <strong>Post a Request</strong> section on the right. Once a peer needs what you teach and has what you want, they will show up here automatically!
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  formSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 active:scale-95 transition"
+              >
+                Update Skills on Right →
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
               {matches.map((peer) => {
-                const requestSent =
+                const isRequested =
                   connectedUsers.includes(peer.id) ||
-                  peer.connectionStatus === "pending" ||
-                  peer.connectionStatus === "accepted";
-
+                  peer.connectionStatus === "pending";
                 const isAccepted = peer.connectionStatus === "accepted";
+                const isConnecting = connectingUserId === peer.id;
 
                 return (
                   <article
                     key={peer.id}
-                    className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
+                    className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs transition-all hover:border-indigo-300 hover:shadow-md"
                   >
-                    {/* Student Information */}
-                    <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
-                      {/* Avatar */}
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-lg font-bold text-indigo-600">
-                        {peer.avatar || peer.name.charAt(0)}
+                    {/* Header: Avatar, Name, Department & Connect Button */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-lg font-bold text-indigo-700 border border-indigo-100 shadow-2xs">
+                          {peer.avatar || peer.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-base font-bold text-slate-950 truncate">
+                            {peer.name}
+                          </h3>
+                          <p className="text-xs text-slate-500 font-medium">
+                            {peer.department} · Semester {peer.semester}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Main Card Content */}
-                      <div className="w-full min-w-0 flex-1">
-                        {/* Name + Connect */}
-                        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="text-center sm:text-left">
-                            <h3 className="font-bold text-slate-900">
-                              {peer.name}
-                            </h3>
-                            <p className="mt-1 text-sm text-slate-500">
-                              {peer.department} · Semester {peer.semester}
-                            </p>
-                          </div>
+                      {/* Action Button */}
+                      <div className="w-full sm:w-auto">
+                        {isAccepted ? (
+                          <Link
+                            to="/chat"
+                            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 active:scale-95 transition"
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.85 9.948 9.948 0 011.026-2.569C4.08 16.273 3 14.264 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                            </svg>
+                            Message
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={isRequested || isConnecting}
+                            onClick={() => handleConnect(peer.id)}
+                            className={`w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition active:scale-95 cursor-pointer ${
+                              isRequested
+                                ? "cursor-default border border-emerald-200 bg-emerald-50 text-emerald-800"
+                                : "bg-indigo-600 text-white shadow-xs hover:bg-indigo-700 disabled:opacity-60"
+                            }`}
+                          >
+                            {isConnecting ? (
+                              "Connecting..."
+                            ) : isRequested ? (
+                              <>
+                                <svg className="h-4 w-4 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Request Sent
+                              </>
+                            ) : (
+                              <>
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.765z" />
+                                </svg>
+                                Connect
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
-                          {isAccepted ? (
-                            <Link
-                              to="/chat"
-                              className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:w-auto"
-                            >
-                              Message
-                            </Link>
-                          ) : (
-                            <button
-                              type="button"
-                              disabled={requestSent}
-                              onClick={() => handleConnect(peer.id)}
-                              className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition sm:w-auto ${
-                                requestSent
-                                  ? "cursor-default border border-emerald-200 bg-emerald-50 text-emerald-700"
-                                  : "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 active:scale-95"
-                              }`}
-                            >
-                              {requestSent ? "Request Sent" : "Connect"}
-                            </button>
-                          )}
+                    {/* Reciprocal Exchange Boxes (Responsive 1-col on mobile, 2-col on tablet/desktop) */}
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* You Learn From Peer */}
+                      <div className="rounded-xl border border-teal-200/80 bg-teal-50/50 p-3.5 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-white text-[10px] font-bold">
+                              ↓
+                            </span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-900">
+                              You Learn From {peer.name.split(" ")[0]}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {(peer.learnFromPeerTags || (peer.learnFromPeer ? peer.learnFromPeer.split(", ") : [])).map((t, idx) => (
+                              <TagBadge key={idx} tag={t} type="learn" size="sm" />
+                            ))}
+                          </div>
                         </div>
+                      </div>
 
-                        {/* Reciprocal Exchange */}
-                        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {/* You Learn */}
-                          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                              You Learn
-                            </p>
-                            <p className="mt-1 font-semibold text-indigo-700">
-                              {peer.learnFromPeer}
-                            </p>
+                      {/* You Teach Peer */}
+                      <div className="rounded-xl border border-indigo-200/80 bg-indigo-50/50 p-3.5 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-white text-[10px] font-bold">
+                              ↑
+                            </span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-900">
+                              You Teach {peer.name.split(" ")[0]}
+                            </span>
                           </div>
-
-                          {/* You Teach */}
-                          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                              You Teach
-                            </p>
-                            <p className="mt-1 font-semibold text-slate-800">
-                              {peer.teachPeer}
-                            </p>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {(peer.teachPeerTags || (peer.teachPeer ? peer.teachPeer.split(", ") : [])).map((t, idx) => (
+                              <TagBadge key={idx} tag={t} type="teach" size="sm" />
+                            ))}
                           </div>
-                        </div>
-
-                        {/* Context */}
-                        <div className="mt-4 text-center sm:text-left">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            Context
-                          </p>
-                          <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-600 sm:mx-0">
-                            {peer.bio}
-                          </p>
                         </div>
                       </div>
                     </div>
+
+                    {/* Bio / Study Context */}
+                    {peer.bio && (
+                      <div className="mt-3.5 pt-3 border-t border-slate-100">
+                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                          <span className="font-semibold text-slate-700">About:</span> {peer.bio}
+                        </p>
+                      </div>
+                    )}
                   </article>
                 );
               })}
@@ -512,89 +609,86 @@ const Dashboard = () => {
         </section>
 
         {/* =====================================
-            POST REQUEST
+            RIGHT: POST / UPDATE SKILL EXCHANGE
         ====================================== */}
-        <section>
-          <div className="mb-5">
-            <span className="text-sm font-semibold text-indigo-600">
-              Skill Exchange
+        <section ref={formSectionRef} className="space-y-4">
+          <div className="border-b border-slate-200 pb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+              Exchange Inventory
             </span>
-
-            <h2 className="mt-1 text-2xl font-bold text-slate-950">
+            <h2 className="mt-0.5 text-xl sm:text-2xl font-extrabold text-slate-950">
               Post a Request
             </h2>
-
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Select what you want to learn and what you can teach in return.
+            <p className="mt-1 text-xs sm:text-sm text-slate-600">
+              Update what you want to learn and what you can teach to trigger matches.
             </p>
           </div>
 
           <form
             onSubmit={handleSubmit}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-6"
           >
-            {/* Learn Topics */}
+            {/* Learn Topics (Weak Tags) */}
             <TopicSelector
-              label="I want to learn"
-              placeholder="Search topics (e.g. React, Algorithms)..."
+              label="I want to learn (My Target Skills)"
+              type="learn"
+              placeholder="Type topic (e.g. React, Algorithms)..."
               selectedTopics={wantToLearn}
               setSelectedTopics={setWantToLearn}
               availableTopics={allTopics}
             />
 
-            <div className="my-6 border-t border-slate-200" />
+            <div className="border-t border-slate-200/80" />
 
-            {/* Teach Topics */}
+            {/* Teach Topics (Strong Tags) */}
             <TopicSelector
-              label="I can teach"
-              placeholder="Search topics (e.g. C++, Python)..."
+              label="I can teach (My Strengths)"
+              type="teach"
+              placeholder="Type topic (e.g. C++, Python, SQL)..."
               selectedTopics={canTeach}
               setSelectedTopics={setCanTeach}
               availableTopics={allTopics}
             />
 
-            {/* Error */}
-            {error && (
-              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {error}
-              </div>
-            )}
-
-            {/* Success */}
-            {message && (
-              <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                {message}
-              </div>
-            )}
-
-            {/* Post Button */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={submitting}
-              className="mt-6 w-full rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-150 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-indigo-700 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
             >
-              {submitting ? "Saving & Matching..." : "Post Request"}
+              {submitting ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Saving & Matching...
+                </>
+              ) : (
+                <>
+                  <span>Save Skills & Discover Matches</span>
+                  <span>→</span>
+                </>
+              )}
             </button>
           </form>
 
-          {/* Information */}
-          <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-            <p className="text-sm leading-6 text-indigo-900">
-              <span className="font-semibold">How matching works:</span>{" "}
-              SkillBridge searches for academic reciprocity: students who can teach your chosen topics and want to learn topics you can teach.
-            </p>
+          {/* Reciprocity Information Box */}
+          <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4">
+            <div className="flex items-start gap-2.5">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold mt-0.5">
+                i
+              </span>
+              <div className="text-xs leading-relaxed text-indigo-950">
+                <p className="font-bold mb-0.5">How SkillBridge matching works:</p>
+                <p>
+                  Our engine matches student pairs with mutual reciprocity (Cycle of 2). You only match with peers who teach what you want to learn AND want to learn what you can teach.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
-      {/* =====================================
-          FOOTER
-      ====================================== */}
-      <footer className="mt-6 border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-6 text-center text-sm text-slate-500">
-          © 2026 SkillBridge · Learn together. Grow together.
-        </div>
-      </footer>
+      {/* Mobile Bottom Navigation */}
+      <BottomNav unreadCount={unreadCount} />
     </div>
   );
 };

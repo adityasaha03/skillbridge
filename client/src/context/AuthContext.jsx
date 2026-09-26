@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getCurrentUser, logoutUser } from '../services/authService';
 
@@ -22,8 +23,27 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    let ignore = false;
+
+    getCurrentUser()
+      .then((currentUser) => {
+        if (!ignore) {
+          setUser(currentUser || null);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Session verification failed:', err);
+        if (!ignore) {
+          setUser(null);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     const handleUnauthorized = () => {
