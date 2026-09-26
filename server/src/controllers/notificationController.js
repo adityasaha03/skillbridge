@@ -36,6 +36,7 @@ const getNotifications = async (req, res) => {
       return {
         id: n._id.toString(),
         matchId: n.match ? n.match.toString() : null,
+        senderId: n.sender?._id ? n.sender._id.toString() : (n.sender ? n.sender.toString() : null),
         type: n.type,
         name: n.sender?.fullName || 'Peer Student',
         avatar: n.sender?.avatar || n.sender?.fullName?.charAt(0).toUpperCase() || 'S',

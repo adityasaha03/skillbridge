@@ -315,7 +315,7 @@ const Notifications = () => {
                         {n.type === "accepted" && (
                           <div className="mt-3">
                             <Link
-                              to="/chat"
+                              to={n.senderId ? `/chat?peerId=${n.senderId}` : (n.matchId ? `/chat?matchId=${n.matchId}` : "/chat")}
                               onClick={(e) => e.stopPropagation()}
                               className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs"
                             >

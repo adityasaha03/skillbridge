@@ -325,7 +325,11 @@ const getMatchHistory = async (req, res) => {
     let totalLearnedCount = 0;
     let totalTaughtCount = 0;
 
-    const formattedHistory = matches.map((m) => {
+    const formattedHistory = [];
+
+    for (const m of matches) {
+      if (!m.userA || !m.userB) continue;
+
       const isUserA = m.userA._id.toString() === currentUserId;
       const peer = isUserA ? m.userB : m.userA;
 
@@ -347,8 +351,9 @@ const getMatchHistory = async (req, res) => {
         year: 'numeric',
       }).format(new Date(dateObj));
 
-      return {
+      formattedHistory.push({
         id: m._id.toString(),
+        peerId: peer._id.toString(),
         name: peer.fullName,
         avatar: peer.avatar || peer.fullName.charAt(0).toUpperCase(),
         department: peer.department || 'CSE',
@@ -357,8 +362,8 @@ const getMatchHistory = async (req, res) => {
         learned,
         taught,
         status: m.status,
-      };
-    });
+      });
+    }
 
     return res.status(200).json({
       success: true,
