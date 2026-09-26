@@ -11,13 +11,29 @@ const getConversations = async (req, res) => {
       $or: [{ userA: currentUserId }, { userB: currentUserId }],
       status: 'accepted',
     })
-      .populate('userA', 'fullName avatar department semester')
-      .populate('userB', 'fullName avatar department semester')
+      .populate({
+        path: 'userA',
+        select: 'fullName avatar department semester institution contextBio strongTags weakTags email phone',
+        populate: [
+          { path: 'strongTags', select: 'name' },
+          { path: 'weakTags', select: 'name' },
+        ],
+      })
+      .populate({
+        path: 'userB',
+        select: 'fullName avatar department semester institution contextBio strongTags weakTags email phone',
+        populate: [
+          { path: 'strongTags', select: 'name' },
+          { path: 'weakTags', select: 'name' },
+        ],
+      })
       .sort({ updatedAt: -1 });
 
     const conversations = [];
 
     for (const m of matches) {
+      if (!m.userA || !m.userB) continue;
+
       const isUserA = m.userA._id.toString() === currentUserId;
       const peer = isUserA ? m.userB : m.userA;
 
@@ -46,9 +62,16 @@ const getConversations = async (req, res) => {
         avatar: peer.avatar || peer.fullName.charAt(0).toUpperCase(),
         department: peer.department || 'CSE',
         semester: peer.semester || '2.2',
+        institution: peer.institution || 'Ahsanullah University of Science and Technology',
+        bio: peer.contextBio || '',
+        email: peer.email || '',
+        phone: peer.phone || '',
+        strongTags: (peer.strongTags || []).map((t) => t.name || t),
+        weakTags: (peer.weakTags || []).map((t) => t.name || t),
         online: true,
         lastMessage: lastMsg ? lastMsg.text : 'Connected! Start your study exchange.',
         lastMessageTime: timeStr,
+        lastMessageDate: lastMsg ? lastMsg.createdAt : m.updatedAt,
         unread: unreadCount,
       });
     }
