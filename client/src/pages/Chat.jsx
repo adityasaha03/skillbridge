@@ -5,14 +5,6 @@ import { fetchNotifications } from "../services/notificationService";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 
-// Quick academic coordination icebreaker prompts
-const STUDY_PROMPTS = [
-  "👋 Hey, when are you free for a study session?",
-  "💻 Let's coordinate a quick Google Meet to discuss!",
-  "📚 Can we review the lecture notes together?",
-  "📝 Do you have practice problems for this topic?",
-  "📍 Are you available to study at the AUST Library?",
-];
 
 // Helper to format date header (Today, Yesterday, or formatted date)
 const formatDateLabel = (dateString) => {
@@ -75,7 +67,7 @@ const renderMessageContent = (text) => {
 };
 
 const Chat = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const peerIdParam = searchParams.get("peerId");
   const matchIdParam = searchParams.get("matchId");
 
@@ -89,8 +81,6 @@ const Chat = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState(null);
-  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
 
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
@@ -171,12 +161,12 @@ const Chat = () => {
     };
   }, [activeContactId]);
 
-  // Auto-scroll on new messages
+  // Only scroll down when switching to a different conversation
   useEffect(() => {
-    if (scrollRef.current) {
+    if (activeContactId && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [activeContactId, activeMessages]);
+  }, [activeContactId]);
 
   const activeContact = useMemo(
     () => conversations.find((c) => c.id === activeContactId),
@@ -229,6 +219,13 @@ const Chat = () => {
     };
     setActiveMessages((prev) => [...prev, optimisticMessage]);
 
+    // Smoothly scroll down on user send
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    }, 50);
+
     try {
       const savedMsg = await sendChatMessage(activeContactId, text);
       setActiveMessages((prev) =>
@@ -263,33 +260,6 @@ const Chat = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
-    }
-  };
-
-  const handleCopyMessage = (text, idx) => {
-    navigator.clipboard?.writeText(text);
-    setCopiedIndex(idx);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
-  const handleInsertPrompt = (promptText) => {
-    setDraft(promptText);
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  };
-
-  const handleCreateMeeting = (type = "google") => {
-    const meetUrl =
-      type === "google"
-        ? "https://meet.google.com/new"
-        : `https://meet.jit.si/skillbridge-aust-${activeContactId?.slice(-6) || "session"}`;
-
-    const message = `💻 I set up a study meeting room! Click here to join: ${meetUrl}`;
-    setDraft(message);
-    setMeetingModalOpen(false);
-    if (textareaRef.current) {
-      textareaRef.current.focus();
     }
   };
 
@@ -356,7 +326,7 @@ const Chat = () => {
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 font-bold text-xs"
+                    className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer"
                   >
                     ×
                   </button>
@@ -368,7 +338,7 @@ const Chat = () => {
                 <button
                   type="button"
                   onClick={() => setFilterType("all")}
-                  className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                  className={`cursor-pointer rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                     filterType === "all"
                       ? "bg-indigo-600 text-white shadow-2xs"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
@@ -379,7 +349,7 @@ const Chat = () => {
                 <button
                   type="button"
                   onClick={() => setFilterType("unread")}
-                  className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                  className={`cursor-pointer flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                     filterType === "unread"
                       ? "bg-indigo-600 text-white shadow-2xs"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
@@ -432,7 +402,7 @@ const Chat = () => {
                           setSearch("");
                           setFilterType("all");
                         }}
-                        className="mt-3 text-xs font-semibold text-indigo-600 hover:underline"
+                        className="cursor-pointer mt-3 text-xs font-semibold text-indigo-600 hover:underline"
                       >
                         Reset filters
                       </button>
@@ -455,12 +425,11 @@ const Chat = () => {
                           : "hover:bg-slate-50/90 active:bg-slate-100"
                       }`}
                     >
-                      {/* Avatar with Status Badge */}
+                      {/* Avatar */}
                       <div className="relative shrink-0">
                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-100 to-indigo-50 text-sm font-bold text-indigo-700 border border-indigo-200/60 shadow-2xs group-hover:scale-102 transition-transform">
                           {contact.avatar || contact.name?.charAt(0)}
                         </div>
-                        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 shadow-xs" />
                       </div>
 
                       {/* Info & Snippet */}
@@ -515,7 +484,7 @@ const Chat = () => {
           >
             {activeContact ? (
               <>
-                {/* Thread Header Bar */}
+                {/* Thread Header Bar (Clean - No Online Status, No Start Call Button) */}
                 <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3 bg-white/95 backdrop-blur-xs z-10">
                   <div className="flex items-center gap-3 min-w-0">
                     {/* Mobile Back Button */}
@@ -534,19 +503,12 @@ const Chat = () => {
                       <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-base font-bold text-indigo-700 border border-indigo-100 shadow-2xs">
                         {activeContact.avatar || activeContact.name?.charAt(0)}
                       </div>
-                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
                     </div>
 
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h2 className="truncate text-sm font-bold text-slate-950">
-                          {activeContact.name}
-                        </h2>
-                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.2 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Online
-                        </span>
-                      </div>
+                      <h2 className="truncate text-sm font-bold text-slate-950">
+                        {activeContact.name}
+                      </h2>
                       <p className="text-[11px] font-medium text-slate-500 truncate">
                         {activeContact.department} · Semester {activeContact.semester} · {activeContact.institution || "AUST"}
                       </p>
@@ -555,19 +517,6 @@ const Chat = () => {
 
                   {/* Header Actions */}
                   <div className="flex items-center gap-1.5">
-                    {/* Instant Study Meeting Button */}
-                    <button
-                      type="button"
-                      onClick={() => setMeetingModalOpen(true)}
-                      className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs active:scale-95"
-                      title="Set up a virtual study call"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      <span className="hidden sm:inline">Start Call</span>
-                    </button>
-
                     {/* Toggle Partner Details Drawer */}
                     <button
                       type="button"
@@ -589,32 +538,8 @@ const Chat = () => {
                 {/* Messages Stream */}
                 <div
                   ref={scrollRef}
-                  className="flex-1 space-y-4 overflow-y-auto bg-slate-50/70 p-4 sm:p-5"
+                  className="flex-1 space-y-3 overflow-y-auto bg-slate-50/70 p-4 sm:p-5"
                 >
-                  {/* Exchange Topic Pill in Chat Header */}
-                  {(activeContact.strongTags?.length > 0 || activeContact.weakTags?.length > 0) && (
-                    <div className="mx-auto max-w-md rounded-xl border border-indigo-100 bg-white/90 p-3 shadow-2xs text-center">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
-                        Academic Exchange Agreement
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-600">
-                        {activeContact.strongTags?.length > 0 && (
-                          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-                            Teaches: {activeContact.strongTags.slice(0, 2).join(", ")}
-                          </span>
-                        )}
-                        {activeContact.strongTags?.length > 0 && activeContact.weakTags?.length > 0 && (
-                          <span className="text-slate-300">·</span>
-                        )}
-                        {activeContact.weakTags?.length > 0 && (
-                          <span className="inline-flex items-center gap-1 font-semibold text-indigo-700">
-                            Learns: {activeContact.weakTags.slice(0, 2).join(", ")}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
                   {activeMessages.length === 0 ? (
                     <div className="flex h-full min-h-[280px] flex-col items-center justify-center text-center p-6 space-y-3">
                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 text-2xl font-bold shadow-2xs">
@@ -625,30 +550,19 @@ const Chat = () => {
                           Say hello to {activeContact.name.split(" ")[0]}!
                         </h3>
                         <p className="max-w-xs text-xs text-slate-500 mt-1 leading-relaxed">
-                          Coordinate topics, share course notes, or agree on a study session time. Click an icebreaker below to get started.
+                          Coordinate topics, share course notes, or agree on a study session time.
                         </p>
-                      </div>
-
-                      {/* Quick Icebreakers Starter */}
-                      <div className="flex flex-wrap justify-center gap-2 max-w-md pt-2">
-                        {STUDY_PROMPTS.slice(0, 3).map((prompt, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => handleInsertPrompt(prompt)}
-                            className="cursor-pointer rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 shadow-2xs hover:bg-indigo-50 transition"
-                          >
-                            {prompt}
-                          </button>
-                        ))}
                       </div>
                     </div>
                   ) : (
                     activeMessages.map((msg, index) => {
                       const isMe = msg.from === "me";
-                      const prevMsg = activeMessages[index - 1];
-                      const isFirstInSequence =
-                        !prevMsg || prevMsg.from !== msg.from;
+                      const prevMsg = index > 0 ? activeMessages[index - 1] : null;
+                      const nextMsg = index < activeMessages.length - 1 ? activeMessages[index + 1] : null;
+
+                      // Consecutive message detection
+                      const isFirstInSequence = !prevMsg || prevMsg.from !== msg.from;
+                      const isLastInSequence = !nextMsg || nextMsg.from !== msg.from;
 
                       // Date separation check
                       const showDateHeader =
@@ -657,7 +571,7 @@ const Chat = () => {
                           formatDateLabel(msg.createdAt);
 
                       return (
-                        <div key={msg.id || index} className="space-y-3">
+                        <div key={msg.id || index} className="space-y-1">
                           {/* Date Header Separator */}
                           {showDateHeader && (
                             <div className="relative my-4 flex items-center justify-center">
@@ -669,16 +583,16 @@ const Chat = () => {
 
                           {/* Message Row */}
                           <div
-                            className={`group relative flex items-end gap-2 ${
+                            className={`relative flex items-end gap-2 ${
                               isMe ? "justify-end" : "justify-start"
                             }`}
                           >
+                            {/* Profile icon beside peer's text: only shown beside the latest (last) chat of consecutive messages */}
                             {!isMe && (
                               <div className="h-7 w-7 shrink-0">
-                                {isFirstInSequence ? (
+                                {isLastInSequence ? (
                                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700 shadow-2xs">
-                                    {activeContact.avatar ||
-                                      activeContact.name?.charAt(0)}
+                                    {activeContact.avatar || activeContact.name?.charAt(0)}
                                   </div>
                                 ) : (
                                   <div className="h-7 w-7" />
@@ -691,72 +605,34 @@ const Chat = () => {
                                 isMe ? "items-end" : "items-start"
                               } max-w-[85%] sm:max-w-[75%]`}
                             >
-                              {/* Sender name on first message from peer */}
+                              {/* Sender name: mentioned only once above the first of consecutive messages */}
                               {!isMe && isFirstInSequence && (
-                                <span className="mb-1 text-[10px] font-bold text-slate-500 pl-1">
+                                <span className="mb-1 text-[11px] font-semibold text-slate-500 pl-1">
                                   {activeContact.name.split(" ")[0]}
                                 </span>
                               )}
 
-                              <div className="relative group/bubble">
-                                <div
-                                  className={`rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed break-words shadow-2xs transition ${
-                                    isMe
-                                      ? "rounded-br-xs bg-indigo-600 text-white font-normal shadow-indigo-100"
-                                      : "rounded-bl-xs border border-slate-200/90 bg-white text-slate-900 font-normal shadow-slate-100"
-                                  }`}
-                                >
-                                  {renderMessageContent(msg.text)}
-                                </div>
-
-                                {/* Floating Copy Button on Hover */}
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopyMessage(msg.text, index)}
-                                  className={`cursor-pointer absolute top-1 ${
-                                    isMe ? "-left-7" : "-right-7"
-                                  } opacity-0 group-hover/bubble:opacity-100 p-1 rounded-md bg-slate-700/80 text-white text-[10px] transition hover:bg-slate-900`}
-                                  title="Copy message"
-                                >
-                                  {copiedIndex === index ? "✓" : "📋"}
-                                </button>
+                              <div
+                                className={`rounded-2xl px-4 py-2 text-xs sm:text-sm leading-relaxed break-words shadow-2xs ${
+                                  isMe
+                                    ? "rounded-br-xs bg-indigo-600 text-white font-normal"
+                                    : "rounded-bl-xs border border-slate-200/90 bg-white text-slate-900 font-normal"
+                                }`}
+                              >
+                                {renderMessageContent(msg.text)}
                               </div>
 
-                              {/* Time + Receipt */}
-                              <div className="mt-1 flex items-center gap-1 px-1 text-[10px] text-slate-400 font-medium">
-                                <span>{msg.time}</span>
-                                {isMe && (
-                                  <span
-                                    className="text-indigo-600 font-bold"
-                                    title={msg.pending ? "Sending..." : "Delivered"}
-                                  >
-                                    {msg.pending ? "⏱" : "✓✓"}
-                                  </span>
-                                )}
-                              </div>
+                              {isMe && msg.pending && (
+                                <span className="mt-0.5 px-1 text-[10px] text-slate-400 italic">
+                                  Sending...
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
                       );
                     })
                   )}
-                </div>
-
-                {/* Quick Prompts Chips Bar */}
-                <div className="border-t border-slate-100 bg-white/90 px-3 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
-                    Study Prompts:
-                  </span>
-                  {STUDY_PROMPTS.map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleInsertPrompt(prompt)}
-                      className="cursor-pointer whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 active:scale-95 shrink-0"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
                 </div>
 
                 {/* Message Input Form */}
@@ -925,67 +801,11 @@ const Chat = () => {
                     </button>
                   </div>
                 )}
-
-                <button
-                  type="button"
-                  onClick={() => setMeetingModalOpen(true)}
-                  className="cursor-pointer w-full rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-indigo-700 transition"
-                >
-                  Generate Study Call Link
-                </button>
               </div>
             </aside>
           )}
         </div>
       </div>
-
-      {/* =====================================
-          STUDY CALL MODAL
-      ====================================== */}
-      {meetingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-base">Start a Study Call</h3>
-              <button
-                type="button"
-                onClick={() => setMeetingModalOpen(false)}
-                className="cursor-pointer text-slate-400 hover:text-slate-600 text-lg font-bold"
-              >
-                ×
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Choose your preferred meeting platform to insert an instant join link directly into your conversation with {activeContact?.name?.split(" ")[0]}.
-            </p>
-
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                onClick={() => handleCreateMeeting("google")}
-                className="cursor-pointer flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-800 hover:bg-indigo-50 hover:border-indigo-200 transition"
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">🎥</span> Google Meet (Instant)
-                </span>
-                <span className="text-indigo-600 font-bold">Select →</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleCreateMeeting("jitsi")}
-                className="cursor-pointer flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-800 hover:bg-indigo-50 hover:border-indigo-200 transition"
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">🔒</span> SkillBridge Room (Jitsi Meet)
-                </span>
-                <span className="text-indigo-600 font-bold">Select →</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Mobile Bottom Navigation */}
       <BottomNav unreadCount={unreadCount} />
